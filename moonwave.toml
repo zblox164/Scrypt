@@ -1,0 +1,19 @@
+title = "Scrypt"
+gitRepoUrl = "https://github.com/zblox164/Scrypt"
+
+classOrder = [
+    "ScryptClient",
+    "ScryptServer",
+    "ClientNetwork",
+    "ServerNetwork",
+]
+
+[home]
+enabled = true
+includeReadme = false
+
+[docusaurus]
+onBrokenLinks = "throw"
+onBrokenMarkdownLinks = "warn"
+favicon = "/PlacementService.png"
+tagline = "Test"
