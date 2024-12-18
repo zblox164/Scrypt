@@ -1,12 +1,4 @@
 --!strict
---[[
-
-     Scrypt Framework [2024 - 2025] 
-     
-     DO NOT use without permission from the owner.
-     Written by: zblox164
-     
---]]
 
 --[=[
 	@class ScryptServer
