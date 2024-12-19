@@ -1,5 +1,7 @@
 title = "Scrypt"
 gitRepoUrl = "https://github.com/zblox164/Scrypt"
+gitSourceBranch = "main"
+
 
 classOrder = [
     "ScryptClient",
@@ -13,7 +15,9 @@ enabled = true
 includeReadme = false
 
 [docusaurus]
+url = "https://zblox164.github.io"
+baseUrl = "/Scrypt"
 onBrokenLinks = "throw"
 onBrokenMarkdownLinks = "warn"
-favicon = "/PlacementService.png"
+favicon = "./media/test.png"
 tagline = "Test"
