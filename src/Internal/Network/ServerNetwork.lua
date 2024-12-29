@@ -199,7 +199,7 @@ end
 
 --[=[
     @param Name string
-    @param Packet ServerPacketData
+    @param PacketData ServerPacketData
     @within ServerNetwork
     Sends data to a specific player from the server.
 ]=]
@@ -217,7 +217,8 @@ end
 
 --[=[
     @param Name string
-    @param Packet ServerPacketData
+    @param Packet Packet
+    @param IsReliable boolean
     @within ServerNetwork
     Sends data to all players in a server.
 ]=]
