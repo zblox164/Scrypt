@@ -27,13 +27,6 @@ Once you've imported Scrypt into your project, you can begin the next step. Scry
 * Services folder
 * Controllers folder
 * Shared folder
-* Preloader `LocalScript`
-
-The Scrypt module, 'Controllers' folder, and the 'Shared' folder can all be moved under `ReplicatedStorage`. The 'Services' folder should be moved to `ServerScriptService`. Lastly, the Preloader script should be placed in `ReplicatedFirst`.
-
-:::info
-You don't need to use the Preloader `LocalScript`. You can use a custom preload script if you want (or none at all). By default, the preloader script doesn't do anything except change a global variable `Preloaded` to true. This can be used if there are assets that you need to preload before the game starts.
-:::
 
 After you've moved all the framework components to the proper locations, you can begin using the framework.
 
