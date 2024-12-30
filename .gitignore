@@ -1,8 +1,0 @@
-# Project place file
-/Scrypt.rbxlx
-
-# Roblox Studio lock files
-/*.rbxlx.lock
-/*.rbxl.lock
-
-build/
