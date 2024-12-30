@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 title = "Scrypt"
 gitRepoUrl = "https://github.com/zblox164/Scrypt"
 gitSourceBranch = "main"
@@ -21,3 +22,28 @@ onBrokenLinks = "throw"
 onBrokenMarkdownLinks = "warn"
 favicon = "./media/test.png"
 tagline = "WIP Framework for Roblox game development"
+=======
+title = "Scrypt"
+gitRepoUrl = "https://github.com/zblox164/Scrypt"
+gitSourceBranch = "main"
+
+
+classOrder = [
+    "ScryptClient",
+    "ScryptServer",
+    "ClientNetwork",
+    "ServerNetwork",
+]
+
+[home]
+enabled = true
+includeReadme = false
+
+[docusaurus]
+url = "https://zblox164.github.io"
+baseUrl = "/Scrypt"
+onBrokenLinks = "throw"
+onBrokenMarkdownLinks = "warn"
+favicon = "./media/test.png"
+tagline = "WIP Framework for Roblox game development"
+>>>>>>> ed8622b (Initial commit)
