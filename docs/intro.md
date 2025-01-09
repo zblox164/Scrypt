@@ -81,14 +81,14 @@ Function:Destroy() -- clean up
 
 ### GetService() Replacement
 Scrypt loads most Roblox services after you run `.Init` rendering the use of `game:GetService` obsolete when using Scrypt.
-To access a service, simply index the ServicesRBX dictionary with the service you want to get. For example:
+To access a service, simply index the Services dictionary with the service you want to get. For example:
 
 ```lua
 local Scrypt = require(game:GetService("ReplicatedStorage").Scrypt)
 Scrypt.Init():Wait()
 
-local Players = Scrypt.ServicesRBX.Players
-local ReplicatedStorage = Scrypt.ServicesRBX.ReplicatedStorage
+local Players = Scrypt.Services.Players
+local ReplicatedStorage = Scrypt.Services.ReplicatedStorage
 ```
 
 :::info
@@ -139,13 +139,13 @@ RequestFromClient = Scrypt.ServerNetwork.ListenForRequest("Request", function(Ad
 end)
 
 -- Data to client
-Scrypt.ServicesRBX.Players.PlayerAdded:Connect(function(Player: Player)
+Scrypt.Services.Players.PlayerAdded:Connect(function(Player: Player)
 	local Packet = {
 		Data = "Data being sent from server",
 		Reliable = true,
 		Address = Player
 	}
-	Scrypt.ServerNetwork.SendPacketToPlayer("Receive", Packet)	
+	Scrypt.ServerNetwork.SendPacketToClient("Receive", Packet)	
 end)
 ```
 
@@ -175,13 +175,13 @@ end
 
 return BasicMath
 ```
-To access this module from other scripts, normally you have to reference the module and then require it to use it. With Scrypt, all you have to do, is specify you want to access the shared modules and then index the name of the module. In this case, the module is named "BasicMath". In a test script, we can access it with:
+To access this module from other scripts, normally you have to reference the module and then require it to use it. With Scrypt, all you have to do, is run the GetModule function with name of the module passed as an argument. In this case, the module is named "BasicMath". In a test script, we can access it with:
 
 ```lua
 local Scrypt = require(game:GetService("ReplicatedStorage").Scrypt)
 Scrypt.Init():Wait()
 
-local BasicMath = Scrypt.Shared.BasicMath
+local BasicMath = Scrypt.GetModule("BasicMath")
 
 print(BasicMath.Add(64, 100)) --> 164
 print(BasicMath.Subtract(228, 64)) --> 164
@@ -196,12 +196,14 @@ You don't only have to place your game modules in the `Shared/Modules` folder. S
 * `ReplicatedStorage/Shared/Libraries` (Server & Client)
     * Modules that contain specific functions for a specific purpose. For example, a custom quaternion library.
 * `ServerScriptService/Services` (Server)
-    * Game service modules (services docs coming soon).
+    * Game service modules ([Services docs](/Services.md)).
 * `ReplicatedStorage/Controllers` (Client)
-    * Game controller modules (controller docs coming soon).
+    * Game controller modules ([Controller docs](/Controllers.md)).
 
 :::tip
 All modules are lazily loaded! This means modules are only loaded when they are needed instead of all of your scripts being loaded at runtime.
+
+Services and Controllers have their own 'Get' functions. See the API or specific doc pages for more details.
 :::
 
 ---

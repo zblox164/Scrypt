@@ -6,13 +6,16 @@
 	@file Server.lua (Scrypt)
     @client
     @author zblox164
-    @version 0.0.3-alpha
+    @version 0.0.4-alpha
     @since 2024-12-17
 --]]
 
 --[=[
 	@class ScryptClient
 	@client
+	:::danger NOTICE
+	Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please contact zblox164 and provide relevant details.
+	:::
 ]=]
 
 --[=[
@@ -23,16 +26,8 @@
 ]=]
 
 --[=[
-	@prop Controllers {[string]: any}
+	@type Result<T> {Success: boolean, Value: T?, Error: string?}
 	@within ScryptClient
-
-	Returns all loaded Controllers.
-
-	:::info
-	Controllers are lazily loaded so just because a Controller
-	isn't contained within the Controllers table does not mean
-	it cannot be accessed.
-	:::
 ]=]
 
 --[=[
@@ -54,11 +49,16 @@
 ]=]
 
 --[=[
-	@prop ServicesRBX {[Name]: Instance}
+	@prop Services {[Name]: Instance}
 	@within ScryptClient
 	Contains a dictionary of Roblox services.
 ]=]
 
+--[=[
+	@prop Utils {(...any) -> ...any}
+	@within ScryptClient
+	Returns the Utils module. Contains some basic pure functions.
+]=]
 
 --[=[
 	@prop ClientNetwork ClientNetwork
@@ -70,8 +70,8 @@
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 local ScryptClient = {}
-ScryptClient.Controllers = {}:: {[string]: any}
-ScryptClient.Shared = {}:: {[string]: any}
+local Controllers = {}:: {[string]: any}
+local Shared = {}:: {[string]: any}
 
 -- Modules
 local Function = require(script.Parent.Internal.Function)
@@ -84,59 +84,96 @@ local Loaded = Signal.New("Loaded", true)
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- For better Intellisense
+-- For better Intellisense (add modules here if you want them to be loaded manually)
 local function ManualLoadModules()
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	
 	-- Internals
+	ScryptClient.Utils = require(ReplicatedStorage:WaitForChild("Scrypt"):WaitForChild("Internal"):WaitForChild("Utils"))
 	
 	-- Custom Modules
 end
 
--- Loads a module if it meets the criteria
-local function LoadModule(Module: ModuleScript, Modules: {[string]: ModuleScript}): {[string]: ModuleScript}
-	if Module.ClassName ~= "ModuleScript" then return Modules end
+-- Validates a module
+local function ValidateModule(Module: ModuleScript): Result<ModuleScript>
+    if not Module:IsA("ModuleScript") then
+        return { Success = false, Error = "Invalid module type" }:: Result<ModuleScript>
+    end
 
-	local ModuleName = tostring(Module)
-	if Modules[ModuleName] then 
-		error(`{ModuleName} has already been loaded!`) 
-	end
-
-	-- Add the module to a new table
-	local NewModules = table.clone(Modules)
-	NewModules[ModuleName] = Module
-	return NewModules
+    return { Success = true, Value = Module }:: Result<ModuleScript>
 end
 
--- Recursively finds modules starting from the root
-local function FindModules(Root: Instance, Modules: {[string]: ModuleScript}): {[string]: ModuleScript}
-	local CurrentModules = table.clone(Modules)
+-- Validates if a module is unique
+local function ValidateUnique(Name: string, Modules: {[string]: ModuleScript}): Result<string>
+    if Modules[Name] then
+        return { Success = false, Error = `{Name} has already been loaded!` }:: Result<string>
+    end
 
-	for _, Node: Instance in ipairs(Root:GetChildren()) do
-		if Node:IsA("ModuleScript") and not Node:GetAttribute("ManualLoad") then
-			CurrentModules = LoadModule(Node, CurrentModules)
-		elseif #Node:GetChildren() > 0 then
-			CurrentModules = FindModules(Node, CurrentModules)
-		end
+    return { Success = true, Value = Name }:: Result<string>
+end
+
+-- Loads a module if it meets the criteria
+local function LoadModule(Module: ModuleScript, Modules: {[string]: ModuleScript}): Result<{[string]: ModuleScript}>
+    local ModuleValidation = ValidateModule(Module)
+    if not ModuleValidation.Success then
+        return { Success = false, Error = ModuleValidation.Error }:: Result<{[string]: ModuleScript}>
+    end
+
+    local ModuleName = tostring(Module)
+    local UniqueValidation = ValidateUnique(ModuleName, Modules)
+    if not UniqueValidation.Success then
+        return { Success = false, Error = UniqueValidation.Error }:: Result<{[string]: ModuleScript}>
+    end
+
+    local NewModules = table.clone(Modules)
+    NewModules[ModuleName] = Module
+    return { Success = true, Value = NewModules }:: Result<{[string]: ModuleScript}>
+end
+
+local function IsLoadableModule(Node: Instance): boolean
+    return Node:IsA("ModuleScript") and not Node:GetAttribute("ManualLoad")
+end
+
+-- Pure function to accumulate a table
+local function Reduce<T, U>(Table: {T}, Func: (accumulator: U, value: T) -> U, Initial: U): U
+	assert(Table, "Table is not valid")
+	assert(typeof(Func) == "function", "Function expected as second argument")
+
+	local Result = Initial
+	for _, v in ipairs(Table) do
+		Result = Func(Result, v)
 	end
 
-	return CurrentModules
+	return Result
+end
+
+local function FindModules(Root: Instance, Modules: {[string]: ModuleScript}): Result<{[string]: ModuleScript}>
+    return Reduce(Root:GetChildren(), function(accumulator: any, node: Instance)
+        if not accumulator.Success then
+            return accumulator
+        end
+
+        if IsLoadableModule(node) then
+            return LoadModule(node :: ModuleScript, accumulator.Value)
+        end
+        
+        if #node:GetChildren() > 0 then
+            return FindModules(node, accumulator.Value)
+        end
+        
+        return accumulator
+    end, { Success = true, Value = table.clone(Modules) })
 end
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local function LazyLoad(ModuleTable: {[string]: ModuleScript}, LazyLoadTable: {[string]: any}, DEBUG: boolean?): {[string]: any}
+-- Function to lazily load modules (only loads when needed)
+local function LazyLoad(ModuleTable: {[string]: ModuleScript}, LazyLoadTable: {[string]: any}): {[string]: any}
 	local function LoadHelper(ModuleName: string): (boolean, any)
 		return pcall(function()
 			local require = require
 			return require(ModuleTable[ModuleName])
 		end)
-	end
-
-	local function PrintDebugInfo(Message: string)
-		if DEBUG then
-			warn(Message)
-		end
 	end
 
 	-- Setup lazy loading
@@ -148,7 +185,6 @@ local function LazyLoad(ModuleTable: {[string]: ModuleScript}, LazyLoadTable: {[
 				warn(`Failed to load module '{ModuleName}'. Error message: {tostring(LoadedModule)}`)
 			else
 				T[ModuleName] = LoadedModule
-				PrintDebugInfo(`Loaded module: '{ModuleName}'`)
 			end
 
 			return LoadedModule
@@ -158,6 +194,7 @@ local function LazyLoad(ModuleTable: {[string]: ModuleScript}, LazyLoadTable: {[
 	return LazyLoadTable
 end
 
+-- Waits for local player to load
 local function WaitForLocalPlayer(Players: Players): Player
 	local Player = Players.LocalPlayer or function()
 		while not Players.LocalPlayer do
@@ -179,12 +216,15 @@ local function WaitForAssets(): boolean
 	return true
 end
 
-local function LoadSharedModules()
+local function LoadSharedModules(): {[string]: ModuleScript}
 	local SharedFolder = RBXServices.ReplicatedStorage:WaitForChild("Shared")
 	local Libraries = FindModules(SharedFolder:WaitForChild("Libraries"), {})
-	local SharedAndLibraries = FindModules(RBXServices.ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Modules"), Libraries)
 
-	return SharedAndLibraries
+	assert(Libraries.Success, Libraries.Error)
+	local SharedAndLibraries = FindModules(RBXServices.ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Modules"), Libraries.Value:: {[string]: ModuleScript})
+
+	assert(SharedAndLibraries.Success, SharedAndLibraries.Error)
+	return SharedAndLibraries.Value:: {[string]: ModuleScript}
 end
 
 local function SetupBuiltInFeatures()
@@ -231,6 +271,7 @@ local function SetupBuiltInFeatures()
 	end
 end
 
+-- Loads all game modules (controllers)
 local function GetGameModules(EnvironmentLocation: Instance?): {[string]: ModuleScript}
 	local ControllerList: {[string]: Controller} = require(script.Parent.Internal.Controllers)(EnvironmentLocation or RBXServices.ReplicatedStorage:WaitForChild("Controllers"), {})
 	local Modules = {}
@@ -242,29 +283,54 @@ local function GetGameModules(EnvironmentLocation: Instance?): {[string]: Module
 	return Modules
 end
 
+-- Function to load directly accessable features
 local function LoadDirectAccess()
 	-- Built in access
 	ManualLoadModules()
-	ScryptClient.ServicesRBX = RBXServices
+	ScryptClient.Services = RBXServices
 	ScryptClient.LocalPlayer = WaitForLocalPlayer(RBXServices.Players)
 	ScryptClient.GUI = {}:: {[string]: {[string]: GuiObject}}
 	ScryptClient.GUI = nil:: any	
 end
 
-local function SetupFeatures(EnvironmentLocation: Instance?, DEBUG: boolean?)
+local function SetupFeatures(EnvironmentLocation: Instance?)
 	WaitForAssets()
 	
 	local GameModules = GetGameModules(EnvironmentLocation)
-	LazyLoad(GameModules, ScryptClient.Controllers, DEBUG)
+	pcall(LazyLoad, GameModules, Controllers)
 	
 	LoadDirectAccess()
 	
 	local SharedModules = LoadSharedModules()
-	LazyLoad(SharedModules, ScryptClient.Shared, DEBUG)
+	pcall(LazyLoad, SharedModules, Shared)
 	
 	SetupBuiltInFeatures()
 	
 	Loaded:Fire()
+end
+
+--[=[
+	Loads and returns a controller by name. Controllers are lazily loaded so they are only run when this function is invoked.
+
+	@within ScryptClient
+	@param Name string
+	@return any
+	@client
+]=]
+function ScryptClient.GetController(Name: string): any
+	return Controllers[Name]
+end
+
+--[=[
+	Loads and returns a shared module by name. Shared modules are lazily loaded so they are only run when this function is invoked.
+
+	@within ScryptClient
+	@param Name string
+	@return any
+	@client
+]=]
+function ScryptClient.GetModule(Name: string): any
+	return Shared[Name]
 end
 
 --[=[
@@ -285,29 +351,34 @@ end
 	:::
 
 	@param EnvironmentLocation Instance?
-	@param DEBUG boolean?
 	@return Signal
 	@client
 ]=]
-function ScryptClient.Init(EnvironmentLocation: Instance?, DEBUG: boolean?): Signal
-	task.spawn(SetupFeatures, EnvironmentLocation, DEBUG)	
+function ScryptClient.Init(EnvironmentLocation: Instance?): Signal
+	task.spawn(SetupFeatures, EnvironmentLocation)	
 	return Loaded
 end
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Types
-export type Controller = {
+type Result<T> = {
+    Success: boolean,
+    Value: T?,
+    Error: string?
+}
+
+type Controller = {
 	["Name"]: string,
 	["Controller"]: any
 }
 
-export type Signal = typeof(setmetatable({}:: {
+type Signal = typeof(setmetatable({}:: {
 	Connections: {Signal.SignalConnection?},
 	YieldedConnections: {thread?}
 }, {}:: Signal.SignalImpl))
 
-export type Function = typeof(setmetatable({}:: {
+type Function = typeof(setmetatable({}:: {
 	Function: ((...any) -> ...any)?,
 	YieldedCalls: {thread?}
 }, {}:: Function.FunctionImpl))

@@ -5,18 +5,30 @@
 	@file Network.lua
     @shared
     @author zblox164
-    @version 0.0.3-alpha
+    @version 0.0.4-alpha
     @since 2024-12-17
 --]]
 
 local RunService: RunService = game:GetService("RunService")
 
-if RunService:IsServer() then
+local function GetServerNetwork()
 	return require(script.ServerNetwork)
-else
+end
+
+local function GetClientNetwork()
 	task.defer(function() 
 		script:WaitForChild("ServerNetwork"):Destroy() 
 	end)
 	
 	return require(script.ClientNetwork)
 end
+
+local function Network()
+	if RunService:IsServer() then
+		return GetServerNetwork()
+	else
+		return GetClientNetwork()
+	end
+end
+
+return Network()

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # Services
@@ -34,7 +34,7 @@ By categorizing modules into distinct types, such as controllers and shared modu
 Services are extremely easy to setup and use. To get started, ensure you have Scrypt installed into your studio session. Next, add a `ModuleScript` into `ServerScriptService/Services` (use custom path if specified). 
 
 :::tip
-Scrypt searches through all non-script instances for servers so you can use folders to separate servers based on feature.
+Scrypt searches through all non-script instances for services so you can use folders to separate servers based on feature.
 :::
 
 Give it a name, preferably with a suffix of "Service" to follow the standard naming convention. We can start writing our code like any regular `ModuleScript`. Let's give it some placeholder functions:
@@ -60,11 +60,13 @@ end
 return TestService
 ```
 
-:::info
-If you need to access the Scrypt framework in a service, shared module, or service, you do not need to wait for the framework to load. Doing so will cause issues.
+:::danger
+Modules cannot yield while being initially loaded. This means you cannot have global variables with `WaitForChild` or anything that will yield the current thread.
+
+This also means that if you need to access the Scrypt framework in a service, shared module, or controller, you should not need to wait for the framework to load.
 :::
 
-To access the service, in a separate `ServerScript`, simply reference the service through the `Scrypt.Services` property:
+To access the service, in a separate `ServerScript`, simply run the `GetService` function with the name of the controller passed as an argument:
 ```lua
 --!strict
 --@server
@@ -72,7 +74,7 @@ To access the service, in a separate `ServerScript`, simply reference the servic
 local Scrypt = require(game:GetService("ReplicatedStorage").Scrypt)
 Scrypt.Init():Wait()
 
-local TestService = Scrypt.Services.TestService
+local TestService = Scrypt:GetService("TestService")
 print(TestService.Get("TEST")) --> TEST
 ```
 :::tip

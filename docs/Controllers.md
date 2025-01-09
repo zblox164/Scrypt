@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 3
 ---
 
 # Controllers
@@ -60,11 +60,13 @@ end
 return TestController
 ```
 
-:::info
-If you need to access the Scrypt framework in a controller, shared module, or service, you do not need to wait for the framework to load. Doing so will cause issues.
+:::danger
+Modules cannot yield while being initially loaded. This means you cannot have global variables with `WaitForChild` or anything that will yield the current thread.
+
+This also means that if you need to access the Scrypt framework in a service, shared module, or controller, you should not need to wait for the framework to load.
 :::
 
-To access the controller, in a separate `LocalScript`, simply reference the controller through the `Scrypt.Controllers` property:
+To access the controller, in a separate `LocalScript`, simply run the `GetController` function with the name of the controller passed as an argument:
 ```lua
 --!strict
 --@client
@@ -72,7 +74,7 @@ To access the controller, in a separate `LocalScript`, simply reference the cont
 local Scrypt = require(game:GetService("ReplicatedStorage").Scrypt)
 Scrypt.Init():Wait()
 
-local TestController = Scrypt.Controllers.TestController
+local TestController = Scrypt.GetController("TestController")
 print(TestController.Get("TEST")) --> TEST
 ```
 :::tip

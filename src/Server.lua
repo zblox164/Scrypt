@@ -6,13 +6,16 @@
 	@file Server.lua (Scrypt)
     @server
     @author zblox164
-    @version 0.0.3-alpha
+    @version 0.0.4-alpha
     @since 2024-12-17
 --]]
 
 --[=[
 	@class ScryptServer
 	@server
+	:::danger NOTICE
+	Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please contact zblox164 and provide relevant details.
+	:::
 ]=]
 
 --[=[
@@ -23,16 +26,8 @@
 ]=]
 
 --[=[
-	@prop Services {[string]: any}
+	@type Result<T> {Success: boolean, Value: T?, Error: string?}
 	@within ScryptServer
-
-	Returns all loaded Services.
-
-	:::info
-	Services are lazily loaded so just because a Service
-	isn't contained within the Services table does not mean
-	it cannot be accessed.
-	:::
 ]=]
 
 --[=[
@@ -49,11 +44,16 @@
 ]=]
 
 --[=[
-	@prop ServicesRBX {[Name]: Instance}
+	@prop Services {[Name]: Instance}
 	@within ScryptServer
 	Contains a dictionary of Roblox services.
 ]=]
 
+--[=[
+	@prop Utils {(...any) -> ...any}
+	@within ScryptServer
+	Returns the Utils module. Contains some basic pure functions.
+]=]
 
 --[=[
 	@prop ServerNetwork ServerNetwork
@@ -65,9 +65,8 @@
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 local ScryptServer = {}
-ScryptServer.Services = {}:: {[string]: any}
-ScryptServer.Controllers = {}:: {[string]: any}
-ScryptServer.Shared = {}
+local Services = {}:: {[string]: any}
+local Shared = {}
 ScryptServer.LocalPlayer = newproxy():: Player -- For better Intellisense on the client
 
 -- Modules
@@ -81,70 +80,97 @@ local Loaded = Signal.New("Loaded", true)
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- Loads a module if it meets the criteria
-local function LoadModule(Module: ModuleScript, Modules: {[string]: ModuleScript}): {[string]: ModuleScript}
-	if Module.ClassName ~= "ModuleScript" then return Modules end
+-- Validates a module
+local function ValidateModule(Module: ModuleScript): Result<ModuleScript>
+    if not Module:IsA("ModuleScript") then
+        return { Success = false, Error = "Invalid module type" }:: Result<ModuleScript>
+    end
 
-	local ModuleName = tostring(Module)
-	if Modules[ModuleName] then 
-		error(`{ModuleName} has already been loaded!`) 
-	end
-
-	-- Add the module to a new table
-	local NewModules = table.clone(Modules)
-	NewModules[ModuleName] = Module
-	return NewModules
+    return { Success = true, Value = Module }:: Result<ModuleScript>
 end
 
--- Recursively finds modules starting from the root
-local function FindModules(Root: Instance, Modules: {[string]: ModuleScript}): {[string]: ModuleScript}
-	local CurrentModules = table.clone(Modules)
+-- Validates if a module is unique
+local function ValidateUnique(Name: string, Modules: {[string]: ModuleScript}): Result<string>
+    if Modules[Name] then
+        return { Success = false, Error = `{Name} has already been loaded!` }:: Result<string>
+    end
 
-	for _, Node: Instance in ipairs(Root:GetChildren()) do
-		if Node:IsA("ModuleScript") and not Node:GetAttribute("ManualLoad") then
-			CurrentModules = LoadModule(Node, CurrentModules)
-		elseif #Node:GetChildren() > 0 then
-			CurrentModules = FindModules(Node, CurrentModules)
-		end
+    return { Success = true, Value = Name }:: Result<string>
+end
+
+-- Loads a module if it meets the criteria
+local function LoadModule(Module: ModuleScript, Modules: {[string]: ModuleScript}): Result<{[string]: ModuleScript}>
+    local ModuleValidation = ValidateModule(Module)
+    if not ModuleValidation.Success then
+        return { Success = false, Error = ModuleValidation.Error }:: Result<{[string]: ModuleScript}>
+    end
+
+    local ModuleName = tostring(Module)
+    local UniqueValidation = ValidateUnique(ModuleName, Modules)
+    if not UniqueValidation.Success then
+        return { Success = false, Error = UniqueValidation.Error }:: Result<{[string]: ModuleScript}>
+    end
+
+    local NewModules = table.clone(Modules)
+    NewModules[ModuleName] = Module
+    return { Success = true, Value = NewModules }:: Result<{[string]: ModuleScript}>
+end
+
+local function IsLoadableModule(Node: Instance): boolean
+    return Node:IsA("ModuleScript") and not Node:GetAttribute("ManualLoad")
+end
+
+-- Pure function to accumulate a table
+local function Reduce<T, U>(Table: {T}, Func: (accumulator: U, value: T) -> U, Initial: U): U
+	assert(Table, "Table is not valid")
+	assert(typeof(Func) == "function", "Function expected as second argument")
+
+	local Result = Initial
+	for _, v in ipairs(Table) do
+		Result = Func(Result, v)
 	end
 
-	return CurrentModules
+	return Result
+end
+
+local function FindModules(Root: Instance, Modules: {[string]: ModuleScript}): Result<{[string]: ModuleScript}>
+    return Reduce(Root:GetChildren(), function(accumulator: any, node: Instance)
+        if not accumulator.Success then
+            return accumulator
+        end
+
+        if IsLoadableModule(node) then
+            return LoadModule(node :: ModuleScript, accumulator.Value)
+        end
+        
+        if #node:GetChildren() > 0 then
+            return FindModules(node, accumulator.Value)
+        end
+        
+        return accumulator
+    end, { Success = true, Value = table.clone(Modules) })
 end
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- For better Intellisense
+-- For better Intellisense (add modules here if you want them to be loaded manually)
 local function ManualLoadModules()
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 	-- Internals
-	-- local ArrayFunctions = require(ReplicatedStorage.Shared.Libraries.Array)
-	-- ScryptServer.Shared.Array = ArrayFunctions
-
-	-- local MathFunctions = require(ReplicatedStorage.Shared.Libraries.Math)
-	-- ScryptServer.Shared.Math = MathFunctions
-
-	-- local StringFunctions = require(ReplicatedStorage.Shared.Libraries.String)
-	-- ScryptServer.Shared.String = StringFunctions
-
-	-- local Utilities = require(ReplicatedStorage.Shared.Libraries.Utilities)
-	-- ScryptServer.Shared.Utilities = Utilities
+	ScryptServer.Utils = require(ReplicatedStorage:WaitForChild("Scrypt"):WaitForChild("Internal"):WaitForChild("Utils"))
+	
 
 	-- Custom Modules
 end
 
-local function LazyLoad(ModuleTable: {[string]: ModuleScript}, LazyLoadTable: {[string]: any}, DEBUG: boolean?): {[string]: any}
+-- Function to lazily load modules (only loads when needed)
+local function LazyLoad(ModuleTable: {[string]: ModuleScript}, LazyLoadTable: {[string]: any}): {[string]: any}
 	local function LoadHelper(ModuleName: string): (boolean, any)
 		return pcall(function()
 			local require = require
 			return require(ModuleTable[ModuleName])
 		end)
-	end
-
-	local function PrintDebugInfo(Message: string)
-		if DEBUG then
-			warn(Message)
-		end
 	end
 
 	-- Setup lazy loading
@@ -156,7 +182,6 @@ local function LazyLoad(ModuleTable: {[string]: ModuleScript}, LazyLoadTable: {[
 				warn(`Failed to load module '{ModuleName}'. Error message: {tostring(LoadedModule)}`)
 			else
 				T[ModuleName] = LoadedModule
-				PrintDebugInfo(`Loaded module: '{ModuleName}'`)
 			end
 
 			return LoadedModule
@@ -166,14 +191,19 @@ local function LazyLoad(ModuleTable: {[string]: ModuleScript}, LazyLoadTable: {[
 	return LazyLoadTable
 end
 
-local function LoadSharedModules()
+-- Loads all shared modules
+local function LoadSharedModules(): {[string]: ModuleScript}
 	local SharedFolder = RBXServices.ReplicatedStorage:WaitForChild("Shared")
 	local Libraries = FindModules(SharedFolder:WaitForChild("Libraries"), {})
-	local SharedAndLibraries = FindModules(RBXServices.ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Modules"), Libraries)
+	
+	assert(Libraries.Success, Libraries.Error)
+	local SharedAndLibraries = FindModules(RBXServices.ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Modules"), Libraries.Value:: {[string]: ModuleScript})
 
-	return SharedAndLibraries
+	assert(SharedAndLibraries.Success, SharedAndLibraries.Error)
+	return SharedAndLibraries.Value:: {[string]: ModuleScript}
 end
 
+-- Loads all built in features
 local function SetupBuiltInFeatures()
 	ScryptServer.Promise = Promise
 	ScryptServer.Symbol = Symbol
@@ -221,6 +251,7 @@ local function SetupBuiltInFeatures()
 	end
 end
 
+-- Function to get all services
 local function GetServices(EnvironmentLocation: Instance?): {[string]: ModuleScript}
 	local ServiceList: {[string]: Service} = require(script.Parent.Internal.Services)(EnvironmentLocation or game:GetService("ServerScriptService"):WaitForChild("Services"), {})
 	local Modules = {}
@@ -232,24 +263,54 @@ local function GetServices(EnvironmentLocation: Instance?): {[string]: ModuleScr
 	return Modules
 end
 
+-- Function to load directly accessable features
 local function LoadDirectAccess()
 	-- Built in access
 	ManualLoadModules()
-	ScryptServer.ServicesRBX = RBXServices
+	ScryptServer.Services = RBXServices
 end
 
-local function SetupFeatures(EnvironmentLocation: Instance?, DEBUG: boolean?)	
+local function SetupFeatures(EnvironmentLocation: Instance?)	
 	local GameModules = GetServices(EnvironmentLocation)
-	LazyLoad(GameModules, ScryptServer.Services, DEBUG)
+	LazyLoad(GameModules, Services)
 	
 	local SharedModules = LoadSharedModules()
-	LazyLoad(SharedModules, ScryptServer.Shared, DEBUG)
+	LazyLoad(SharedModules, Shared)
 	
 	LoadDirectAccess()
 	SetupBuiltInFeatures()
 	
 	Loaded:Fire()
 end
+
+function ScryptServer.GetController(Name: string): any
+	return error("CANNOT BE RUN ON SERVER")
+end
+
+--[=[
+	Loads and returns a Service by name. Services are lazily loaded so they are only run when this function is invoked.
+
+	@within ScryptServer
+	@param Name string
+	@return any
+	@client
+]=]
+function ScryptServer.GetService(Name: string): any
+	return Services[Name]
+end
+
+--[=[
+	Loads and returns a shared module by name. Shared modules are lazily loaded so they are only run when this function is invoked.
+
+	@within ScryptServer
+	@param Name string
+	@return any
+	@client
+]=]
+function ScryptServer.GetModule(Name: string): any
+	return Shared[Name]
+end
+
 
 --[=[
 	Initializes the framework and loads all shared modules, libraries, and services.
@@ -269,15 +330,14 @@ end
 	:::
 
 	@param EnvironmentLocation Instance?
-	@param DEBUG boolean?
 	@return Signal
 	@server
 ]=]
-function ScryptServer.Init(EnvironmentLocation: Instance?, DEBUG: boolean?): Signal
+function ScryptServer.Init(EnvironmentLocation: Instance?): Signal
 	if RBXServices.RunService:IsStudio() then
-		task.delay(0, SetupFeatures, EnvironmentLocation, DEBUG)
+		task.delay(0, SetupFeatures, EnvironmentLocation)
 	else
-		task.spawn(SetupFeatures, DEBUG)	
+		task.spawn(SetupFeatures)
 	end
 	
 	return Loaded
@@ -286,25 +346,31 @@ end
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Types
-export type Service = {
+type Service = {
 	["Name"]: string,
 	["Service"]: any
 }
 
-export type SharedModule = {[string]: any}
+type Result<T> = {
+    Success: boolean,
+    Value: T?,
+    Error: string?
+}
 
-export type Signal = typeof(setmetatable({}:: {
+type SharedModule = {[string]: any}
+
+type Signal = typeof(setmetatable({}:: {
 	Connections: {Signal.SignalConnection?},
 	YieldedConnections: {thread?}
 }, {}:: Signal.SignalImpl))
 
-export type Function = typeof(setmetatable({}:: {
+type Function = typeof(setmetatable({}:: {
 	Function: ((...any) -> ...any)?,
 	YieldedCalls: {thread?}
 }, {}:: Function.FunctionImpl))
 
-export type Packet = number | string | {ClientPacketData} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
-export type ClientPacketData = {
+type Packet = number | string | {ClientPacketData} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
+type ClientPacketData = {
     Data: Packet,
     Reliable: boolean
 }
@@ -312,7 +378,7 @@ export type ClientPacketData = {
 type ClientNetwork = {
     SendPacket: (Name: string, Packet: ClientPacketData) -> (),
     PingServer: (Name: string, IsReliable: boolean) -> (),
-    RequestPacket: (Name: string, Packet: ClientPacketData) -> Packet,
+    RequestPacket: (Name: string, Packet: Packet) -> Packet,
     EmptyRequest: (Name: string) -> Packet,
     ListenForPacket: (Name: string, IsReliable: boolean, Callback: (...ClientPacketData) -> ()) -> RBXScriptConnection,
     Init: () -> Folder,

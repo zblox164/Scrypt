@@ -6,12 +6,15 @@
 	@file ClientNetwork.lua
     @client
     @author zblox164
-    @version 0.0.3-alpha
+    @version 0.0.4-alpha
     @since 2024-12-17
 --]]
 
 --[=[
     @class ClientNetwork
+    :::danger NOTICE
+    Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please contact zblox164 and provide relevant details.
+    :::
 ]=]
 local ClientNetwork = {}
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -33,24 +36,26 @@ export type ClientPacketData = {
     Reliable: boolean
 }
 
--- Creates and returns signal
-local function CreateSignal(Name: string, Reliable: boolean): RemoteEvent | UnreliableRemoteEvent
-    assert(Name, "Expected string as first argument.")
+type Result<T> = {
+    Success: boolean,
+    Value: T?,
+    Error: string?
+}
 
-    local Remotes = ReplicatedStorage:FindFirstChild("ScryptCommunication")
-    assert(Remotes, "Attempt to create signal before network was loaded!")
+-- Pure function to validate remote creation params
+local function ValidateParams(Name: string, Remotes: Instance?): Result<string>
+    if not Name then
+        return { Success = false, Error = "Expected string as first argument" }:: Result<string>
+    end
 
-    local Functions = Remotes:FindFirstChild("Functions")
-    assert(Functions, "Attempt to create signal before network was loaded!")
+    if not Remotes then 
+        return { Success = false, Error = "Attempt to create function before network was loaded" }:: Result<string>
+    end
 
-    local CreateRemote = Functions:WaitForChild("CreateRemote"):: RemoteFunction
-    local NewSignal = CreateRemote:InvokeServer(true, Name, Reliable):: RemoteEvent? | UnreliableRemoteEvent?
-    assert(NewSignal, "Error creating signal!")
+    return { Success = true, Value = Name }:: Result<string>
+end
 
-    return NewSignal
-end 
-
--- Creates and returns function
+-- Creates and returns a function
 local function CreateFunction(Name: string): RemoteFunction
     assert(Name, "Expected string as first argument.")
 
@@ -67,28 +72,46 @@ local function CreateFunction(Name: string): RemoteFunction
     return NewSignal
 end
 
--- Finds unreliable signal based on name
-local function GetUnreliableEvent(Name: string, Signals: Folder): UnreliableRemoteEvent
-    local NewSignal: UnreliableRemoteEvent = Signals:FindFirstChild(Name):: UnreliableRemoteEvent
-    if not NewSignal then
-        NewSignal = CreateSignal(Name, false):: UnreliableRemoteEvent
+-- Creates and returns a remote
+local function CreateRemote(Name: string, IsSignal: boolean, IsReliable: boolean): Instance
+    local Remotes = ReplicatedStorage:FindFirstChild("ScryptCommunication")
+    assert(Remotes, "Attempt to create remote before network was loaded!")
+
+    local Category = if IsSignal then "Signals" else "Functions"
+    local Container = Remotes:FindFirstChild(Category)
+    assert(Container, "Attempt to create remote before network was loaded!")
+    
+    local Functions = Remotes:FindFirstChild("Functions")
+    assert(Functions, "Attempt to create remote before network was loaded!")
+
+    local CreateRemoteFunc = Functions:WaitForChild("CreateRemote"):: RemoteFunction
+    local Remote = CreateRemoteFunc:InvokeServer(IsSignal, Name, IsReliable)
+    return Remote
+end
+
+-- Function to get or create remote
+local function GetOrCreateRemote(Name: string, Container: Folder, IsReliable: boolean): Instance
+    local Existing = Container:FindFirstChild(Name)
+    if Existing then
+        return Existing
     end
 
-    assert(NewSignal, "Error finding signal " .. Name)
-    return NewSignal
+    return CreateRemote(Name, true, IsReliable)
+end
+
+-- Finds unreliable signal based on name
+local function GetUnreliableEvent(Name: string, Signals: Folder): UnreliableRemoteEvent  
+    local Validation = ValidateParams(Name, Signals)
+    assert(Validation.Success, Validation.Error)
+    return GetOrCreateRemote(Name, Signals, false):: UnreliableRemoteEvent
 end
 
 -- Finds signal based on name
 local function GetEvent(Name: string, Signals: Folder): RemoteEvent
-    local NewSignal: RemoteEvent = Signals:FindFirstChild(Name):: RemoteEvent
-    if not NewSignal then
-        NewSignal = CreateSignal(Name, true):: RemoteEvent
-    end
-
-    assert(NewSignal, "Error finding signal " .. Name)
-    return NewSignal
+    local Validation = ValidateParams(Name, Signals)
+    assert(Validation.Success, Validation.Error)
+    return GetOrCreateRemote(Name, Signals, true):: RemoteEvent
 end
-
 
 -- Finds signal based on name and reliability
 local function FindSignal(Name: string, Signals: Folder, IsReliable: boolean): RemoteEvent | UnreliableRemoteEvent
@@ -98,8 +121,8 @@ local function FindSignal(Name: string, Signals: Folder, IsReliable: boolean): R
     return NewSignal
 end
 
--- Returns a function based on the name
-local function GetFunction(Name: string): RemoteFunction
+-- Returns a function based on the name and creates one if it does not exist
+local function ReturnFunction(Name: string): RemoteFunction
     local Remotes = ReplicatedStorage:FindFirstChild("ScryptCommunication")
     assert(Remotes, "Attempt to use function before network was loaded!")
 
@@ -146,19 +169,19 @@ end
 
 --[=[
     @param Name string
-    @param Packet ClientPacketData
+    @param PacketData ClientPacketData
     @within ClientNetwork
     Sends data to the server.
 ]=]
-function ClientNetwork.SendPacket(Name: string, Packet: ClientPacketData)
+function ClientNetwork.SendPacket(Name: string, PacketData: ClientPacketData)
     assert(Name, "Expected string as first argument.")
-    assert(Packet, "Expected ClientPacketData as second argument.")
+    assert(PacketData, "Expected ClientPacketData as second argument.")
     
-    local Signal = ReturnSignal(Name, Packet.Reliable)
+    local Signal = ReturnSignal(Name, PacketData.Reliable)
     if Signal:IsA("RemoteEvent") then
-        (Signal:: RemoteEvent):FireServer(Packet.Data)
+        (Signal:: RemoteEvent):FireServer(PacketData.Data)
     else
-        (Signal:: UnreliableRemoteEvent):FireServer(Packet.Data)
+        (Signal:: UnreliableRemoteEvent):FireServer(PacketData.Data)
     end
 end
 
@@ -200,6 +223,7 @@ end
 
 --[=[
     @param Name string
+    @param Packet Packet
     @return Packet
     @yields
     @within ClientNetwork
@@ -209,7 +233,7 @@ function ClientNetwork.RequestPacket(Name: string, Packet: Packet): Packet
     assert(Name, "Expected string as first argument.")
     assert(Packet, "Expected Packet as second argument.")
 
-    local Function = GetFunction(Name)
+    local Function = ReturnFunction(Name)
     local Request = Function:InvokeServer(Packet)
     return Request
 end
@@ -223,7 +247,7 @@ end
 function ClientNetwork.EmptyRequest(Name: string): Packet
     assert(Name, "Expected string as first argument.")
 
-    local Function = GetFunction(Name)
+    local Function = ReturnFunction(Name)
     local Request = Function:InvokeServer()
     return Request
 end

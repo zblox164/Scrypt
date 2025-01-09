@@ -6,7 +6,7 @@
 	@file Symbol.lua
     @shared
     @author zblox164
-    @version 1.0.0
+    @version 1.0.1
     @since 2024-12-17
 
 --]]
@@ -36,11 +36,8 @@ export type Symbol = typeof(newproxy(true)) & {[string]: any}
 ]=]
 local function Symbol(Name: string?): Symbol
 	local NewSymbol = newproxy(true)
-	
-	local NewName = Name
-	if not NewName then 
-		NewName = "Symbol" 
-	end
+	local NewName = Name or "Symbol"
+	assert(typeof(NewName) == "string", "Name must be a string")
 	
 	getmetatable(NewSymbol).__tostring = function()
 		return NewName
