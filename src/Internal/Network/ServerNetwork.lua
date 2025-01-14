@@ -286,7 +286,7 @@ end
     @within ServerNetwork
     Sends data to a specific player from the server.
 ]=]
-function ServerNetwork.SendPacketToPlayer(Name: string, PacketData: ServerPacketData)
+function ServerNetwork.SendPacketToClient(Name: string, PacketData: ServerPacketData)
     assert(Name, "Expected string as first argument.")
     assert(PacketData, "Expected ServerPacketData as second argument.")
     
@@ -303,9 +303,9 @@ end
     @param Packet Packet
     @param IsReliable boolean
     @within ServerNetwork
-    Sends data to all players in a server.
+    Sends data to all clients in a server.
 ]=]
-function ServerNetwork.SendPacketToAllPlayers(Name: string, Packet: Packet, IsReliable: boolean)
+function ServerNetwork.SendPacketToAllClients(Name: string, Packet: Packet, IsReliable: boolean)
     assert(Name, "Expected string as first argument.")
     assert(Packet, "Expected ServerPacketData as second argument.")
 
@@ -316,7 +316,7 @@ function ServerNetwork.SendPacketToAllPlayers(Name: string, Packet: Packet, IsRe
             Reliable = IsReliable
         }:: ServerPacketData
 
-        ServerNetwork.SendPacketToPlayer(Name, PlayerPacket)
+        ServerNetwork.SendPacketToClient(Name, PlayerPacket)
     end
 end
 
@@ -325,7 +325,7 @@ end
     @param Address Player
     @param IsReliable boolean
     @within ServerNetwork
-    Pings a specific player. This function should be used when you want to communicate with the client but don't want to send any data.
+    Pings a specific client. This function should be used when you want to communicate with the client but don't want to send any data.
 ]=]
 function ServerNetwork.PingClient(Name: string, Address: Player, IsReliable: boolean)
     assert(Name, "Expected string as first argument.")
@@ -344,7 +344,7 @@ end
     @param Name string
     @param IsReliable boolean
     @within ServerNetwork
-    Pings all players. This function should be used when you want to communicate with all clients but don't want to send any data.
+    Pings all clients. This function should be used when you want to communicate with all clients but don't want to send any data.
 ]=]
 function ServerNetwork.PingAllClients(Name: string, IsReliable: boolean)
     assert(Name, "Expected string as first argument.")
