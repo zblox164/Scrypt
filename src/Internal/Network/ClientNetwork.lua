@@ -6,7 +6,7 @@
 	@file ClientNetwork.lua
     @client
     @author zblox164
-    @version 0.0.4-alpha
+    @version 0.0.41-alpha
     @since 2024-12-17
 --]]
 
@@ -30,7 +30,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
     .Reliable boolean
     @within ClientNetwork 
 ]=]
-export type Packet = number | string | {ClientPacketData} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
+export type Packet = number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
 export type ClientPacketData = {
     Data: Packet,
     Reliable: boolean
@@ -66,10 +66,12 @@ local function CreateFunction(Name: string): RemoteFunction
     assert(Functions, "Attempt to create function before network was loaded!")
 
     local CreateRemote = Functions:WaitForChild("CreateRemote"):: RemoteFunction
-    local NewSignal = CreateRemote:InvokeServer(false, Name):: RemoteFunction?
-    assert(NewSignal, "Error creating signal!")
+    local FunctionName = CreateRemote:InvokeServer(false, Name):: string
+    
+    local Function = Functions:WaitForChild(FunctionName)
+    assert(Function, "Error creating function!")
 
-    return NewSignal
+    return Function:: RemoteFunction
 end
 
 -- Creates and returns a remote
@@ -85,7 +87,11 @@ local function CreateRemote(Name: string, IsSignal: boolean, IsReliable: boolean
     assert(Functions, "Attempt to create remote before network was loaded!")
 
     local CreateRemoteFunc = Functions:WaitForChild("CreateRemote"):: RemoteFunction
-    local Remote = CreateRemoteFunc:InvokeServer(IsSignal, Name, IsReliable)
+    local RemoteName = CreateRemoteFunc:InvokeServer(IsSignal, Name, IsReliable):: string
+
+    local Remote = Container:WaitForChild(RemoteName)
+    assert(Remote, "Error creating remote!")
+
     return Remote
 end
 
@@ -95,7 +101,7 @@ local function GetOrCreateRemote(Name: string, Container: Folder, IsReliable: bo
     if Existing then
         return Existing
     end
-
+    
     return CreateRemote(Name, true, IsReliable)
 end
 
@@ -116,6 +122,7 @@ end
 -- Finds signal based on name and reliability
 local function FindSignal(Name: string, Signals: Folder, IsReliable: boolean): RemoteEvent | UnreliableRemoteEvent
     local NewSignal = if IsReliable then GetEvent(Name, Signals) else GetUnreliableEvent(Name, Signals)
+    print(typeof(NewSignal), NewSignal)
     assert(NewSignal.ClassName == "RemoteEvent" or NewSignal.ClassName == "UnreliableRemoteEvent", "Error finding signal " .. Name)
 
     return NewSignal

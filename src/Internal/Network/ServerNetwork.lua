@@ -6,7 +6,7 @@
 	@file ClientNetwork.lua
     @server
     @author zblox164
-    @version 0.0.4-alpha
+    @version 0.0.41-alpha
     @since 2024-12-17
 --]]
 
@@ -222,7 +222,7 @@ local function DetermineRemoteConfig(Params: RemoteParams): Result<RemoteCreateR
 end
 
 -- Creates a remote from a request from the client and returns it
-local function CreateClientRemote(Params: RemoteParams): Instance
+local function CreateClientRemote(Params: RemoteParams): string
     local ValidationResult = ValidateRemoteParams(Params)
     if not ValidationResult.Success then
         return error(ValidationResult.Error)
@@ -234,12 +234,12 @@ local function CreateClientRemote(Params: RemoteParams): Instance
     end
     
     local Config = ConfigResult.Value:: RemoteCreateResult
-    
+
     -- Create instance (this is the only impure operation)
     local NewRemote = Instance.new(Config.RemoteType)
     NewRemote.Name = Config.Name
-    
-    return NewRemote
+
+    return NewRemote.Name
 end
 
 local ServerNetwork = {}

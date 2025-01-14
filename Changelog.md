@@ -1,3 +1,10 @@
+## v0.0.41-alpha
+#### 01/13/2025
+* Fixed bug with network system where creating a client remote would cause an error
+* Fixed issue where some of the functions renamed last update were not updated
+* Added public ServerPacketData to Scrypt
+* Fixed Packet type (in ClientNetwork and Scrypt)
+
 ## v0.0.4-alpha
 #### 01/08/2025
 * Revamp of internal modules to more closely fit the functional paradigm: Services, Controllers, Server, Client, ServerNetwork, ClientNetwork, and both Scrypt and Network loaders
