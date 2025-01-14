@@ -47,7 +47,8 @@ export type ClientPacketData = {
 
 export type ServerPacketData = {
     Data: Packet,
-    Reliable: boolean
+    Reliable: boolean,
+	Address: Player
 }
 
 
