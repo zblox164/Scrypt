@@ -159,7 +159,6 @@ local function ManualLoadModules()
 
 	-- Internals
 	ScryptServer.Utils = require(ReplicatedStorage:WaitForChild("Scrypt"):WaitForChild("Internal"):WaitForChild("Utils"))
-	
 
 	-- Custom Modules
 end
@@ -268,6 +267,7 @@ local function LoadDirectAccess()
 	-- Built in access
 	ManualLoadModules()
 	ScryptServer.Services = RBXServices
+	ScryptServer.GUI = {}:: GUI
 end
 
 local function SetupFeatures(EnvironmentLocation: Instance?)	
@@ -285,6 +285,7 @@ end
 
 function ScryptServer.GetController(Name: string): any
 	return error("CANNOT BE RUN ON SERVER")
+	
 end
 
 --[=[
@@ -356,6 +357,8 @@ type Result<T> = {
     Value: T?,
     Error: string?
 }
+
+type GUI = {[string]: {[string]: GuiObject}}
 
 type SharedModule = {[string]: any}
 

@@ -6,7 +6,7 @@
 	@file Server.lua (Scrypt)
     @client
     @author zblox164
-    @version 0.0.4-alpha
+    @version 0.0.41-alpha
     @since 2024-12-17
 --]]
 
@@ -31,6 +31,11 @@
 ]=]
 
 --[=[
+	@type GUI {[string]: {[string]: GuiObject}}
+	@within ScryptClient
+]=]
+
+--[=[
 	@prop RegExp RegularExpressionClass
 	@within ScryptClient
 	Regular expressions module published by Roblox. See more information in RegEx.lua.
@@ -46,6 +51,12 @@
 --[=[
 	@prop LocalPlayer Player
 	@within ScryptClient
+]=]
+
+--[=[
+	@prop GUI GUI
+	@within ScryptClient
+	Contains a dictionary of GUI objects.
 ]=]
 
 --[=[
@@ -290,7 +301,7 @@ local function LoadDirectAccess()
 	ScryptClient.Services = RBXServices
 	ScryptClient.LocalPlayer = WaitForLocalPlayer(RBXServices.Players)
 	ScryptClient.GUI = {}:: {[string]: {[string]: GuiObject}}
-	ScryptClient.GUI = nil:: any	
+	ScryptClient.GUI = require(script.Parent.Internal.GUI)
 end
 
 local function SetupFeatures(EnvironmentLocation: Instance?)
@@ -372,6 +383,8 @@ type Controller = {
 	["Name"]: string,
 	["Controller"]: any
 }
+
+type GUI = {[string]: {[string]: GuiObject}}
 
 type Signal = typeof(setmetatable({}:: {
 	Connections: {Signal.SignalConnection?},

@@ -6,7 +6,7 @@
 	@file ClientNetwork.lua
     @server
     @author zblox164
-    @version 0.0.41-alpha
+    @version 0.0.42-alpha
     @since 2024-12-17
 --]]
 
@@ -234,10 +234,16 @@ local function CreateClientRemote(Params: RemoteParams): string
     end
     
     local Config = ConfigResult.Value:: RemoteCreateResult
+    local RootFolderResult = VerifyNetworkIntegrity():: Result<Folder>
+    assert(RootFolderResult.Success, RootFolderResult.Error)
 
+    local RootFolder = RootFolderResult.Value:: Folder
+    assert(RootFolder, "Error finding root folder")
+    
     -- Create instance (this is the only impure operation)
     local NewRemote = Instance.new(Config.RemoteType)
     NewRemote.Name = Config.Name
+    NewRemote.Parent = RootFolder:FindFirstChild(Config.Parent)
 
     return NewRemote.Name
 end

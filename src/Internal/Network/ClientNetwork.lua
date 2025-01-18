@@ -6,7 +6,7 @@
 	@file ClientNetwork.lua
     @client
     @author zblox164
-    @version 0.0.41-alpha
+    @version 0.0.42-alpha
     @since 2024-12-17
 --]]
 
@@ -122,7 +122,6 @@ end
 -- Finds signal based on name and reliability
 local function FindSignal(Name: string, Signals: Folder, IsReliable: boolean): RemoteEvent | UnreliableRemoteEvent
     local NewSignal = if IsReliable then GetEvent(Name, Signals) else GetUnreliableEvent(Name, Signals)
-    print(typeof(NewSignal), NewSignal)
     assert(NewSignal.ClassName == "RemoteEvent" or NewSignal.ClassName == "UnreliableRemoteEvent", "Error finding signal " .. Name)
 
     return NewSignal

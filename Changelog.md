@@ -1,3 +1,11 @@
+## v0.0.42-alpha
+#### 01/18/2025
+* Fixed bug with ServerNetwork where when the client creates a remote, it would not get parented to the comms folder
+* Added GUI internal module
+* Minor improvements
+* Improvements to documentation
+    * Updated changelog (it didn't update last version)
+
 ## v0.0.41-alpha
 #### 01/13/2025
 * Fixed bug with network system where creating a client remote would cause an error
