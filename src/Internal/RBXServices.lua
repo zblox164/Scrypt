@@ -37,6 +37,7 @@ return {
 	SocialService = game:GetService("SocialService"),
 	SoundService = game:GetService("SoundService"),
 	StarterGui = game:GetService("StarterGui"),
+	Teams = game:GetService("Teams"),
 	TweenService = game:GetService("TweenService"),
 	TeleportService = game:GetService("TeleportService"),
 	TestService = game:GetService("TestService"),

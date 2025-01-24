@@ -3,7 +3,7 @@
 	@details
 	An module containing functions to communicate with the server.
 
-	@file ClientNetwork.lua
+	@file ClientNetwork.luau
     @client
     @author zblox164
     @version 0.0.42-alpha

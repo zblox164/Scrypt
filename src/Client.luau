@@ -300,7 +300,8 @@ local function LoadDirectAccess()
 	ManualLoadModules()
 	ScryptClient.Services = RBXServices
 	ScryptClient.LocalPlayer = WaitForLocalPlayer(RBXServices.Players)
-	ScryptClient.GUI = {}:: {[string]: {[string]: GuiObject}}
+	
+	ScryptClient.GUI = {}:: GUI
 	ScryptClient.GUI = require(script.Parent.Internal.GUI)
 end
 
@@ -384,7 +385,7 @@ type Controller = {
 	["Controller"]: any
 }
 
-type GUI = {[string]: {[string]: GuiObject}}
+type GUI = {[string]: {[string]: GuiObject} | {Root: GuiObject}}
 
 type Signal = typeof(setmetatable({}:: {
 	Connections: {Signal.SignalConnection?},

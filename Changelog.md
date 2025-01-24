@@ -1,3 +1,9 @@
+## v0.0.43-alpha
+#### 01/23/2025
+* Fixed major framework load bug
+* Improved GUI module
+* Changed files to .luau
+
 ## v0.0.42-alpha
 #### 01/18/2025
 * Fixed bug with ServerNetwork where when the client creates a remote, it would not get parented to the comms folder

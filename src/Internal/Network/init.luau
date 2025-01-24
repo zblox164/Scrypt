@@ -2,7 +2,7 @@
 	@details
 	Returns the Scrypt network framework for the client and server.
 
-	@file Network.lua
+	@file Network.luau
     @shared
     @author zblox164
     @version 0.0.4-alpha
