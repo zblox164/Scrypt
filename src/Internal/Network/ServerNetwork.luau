@@ -6,14 +6,14 @@
 	@file ClientNetwork.luau
     @server
     @author zblox164
-    @version 0.0.42-alpha
+    @version 0.0.5-alpha
     @since 2024-12-17
 --]]
 
 --[=[
     @class ServerNetwork
     :::danger NOTICE
-    Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please contact zblox164 and provide relevant details.
+    Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please create an issue on the GitHub repository.
     :::
 ]=]
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -58,194 +58,194 @@ type RemoteCreateResult = {
 }
 
 -- Pure function to validate remote creation params
-local function ValidateParams(Name: string, Location: Instance?): Result<string>
-    if not Name then
+local function ValidateParams(name: string, location: Instance?): Result<string>
+    if not name then
         return { Success = false, Error = "Expected string as first argument" }:: Result<string>
     end
 
-    if not Location then 
+    if not location then
         return { Success = false, Error = "Expected Instance as second argument" }:: Result<string>
     end
 
-    return { Success = true, Value = Name }:: Result<string>
+    return { Success = true, Value = name }:: Result<string>
 end
 
 -- Pure function to validate remote params
-local function ValidateRemoteParams(Params: RemoteParams): Result<RemoteParams>
-    if not Params.Name then
+local function ValidateRemoteParams(params: RemoteParams): Result<RemoteParams>
+    if not params.Name then
         return { Success = false, Error = "Missing remote name" }:: Result<RemoteParams>
     end
-    
-    if Params.IsSignal and Params.Reliable == nil then
+
+    if params.IsSignal and params.Reliable == nil then
         return { Success = false, Error = "Reliability must be specified for signals" }:: Result<RemoteParams>
     end
 
-    return { Success = true, Value = Params }:: Result<RemoteParams>
+    return { Success = true, Value = params }:: Result<RemoteParams>
 end
 
 -- Returns the root folder for the network and creates necessary subfolders
 local function VerifyNetworkIntegrity(): Result<Folder>
-    local CommsFolder: Folder = ReplicatedStorage:FindFirstChild("ScryptCommunication"):: Folder
-    if not CommsFolder then
-        CommsFolder = Instance.new("Folder")
-        CommsFolder.Name = "ScryptCommunication"
-        CommsFolder.Parent = ReplicatedStorage
+    local commsFolder: Folder = ReplicatedStorage:FindFirstChild("ScryptCommunication"):: Folder
+    if not commsFolder then
+        commsFolder = Instance.new("Folder")
+        commsFolder.Name = "ScryptCommunication"
+        commsFolder.Parent = ReplicatedStorage
     end
 
     -- Create subfolders if they don't exist
-    local SignalsFolder = CommsFolder:FindFirstChild("Signals") or Instance.new("Folder")
-    SignalsFolder.Name = "Signals"
-    SignalsFolder.Parent = CommsFolder
+    local signalsFolder = commsFolder:FindFirstChild("Signals") or Instance.new("Folder")
+    signalsFolder.Name = "Signals"
+    signalsFolder.Parent = commsFolder
 
-    local FunctionsFolder = CommsFolder:FindFirstChild("Functions") or Instance.new("Folder")
-    FunctionsFolder.Name = "Functions"
-    FunctionsFolder.Parent = CommsFolder
+    local functionsFolder = commsFolder:FindFirstChild("Functions") or Instance.new("Folder")
+    functionsFolder.Name = "Functions"
+    functionsFolder.Parent = commsFolder
 
-    return { Success = true, Value = CommsFolder }:: Result<Folder>
+    return { Success = true, Value = commsFolder }:: Result<Folder>
 end
 
 -- Function to create remote instance
-local function CreateRemoteInstance(Name: string, IsReliable: boolean): Result<RemoteEvent | UnreliableRemoteEvent>
-    local NewEvent = if IsReliable 
-        then Instance.new("RemoteEvent") 
+local function CreateRemoteInstance(name: string, isReliable: boolean): Result<RemoteEvent | UnreliableRemoteEvent>
+    local newEvent = if isReliable
+        then Instance.new("RemoteEvent")
         else Instance.new("UnreliableRemoteEvent")
-    
-    NewEvent.Name = Name
-    return { Success = true, Value = NewEvent }:: Result<RemoteEvent | UnreliableRemoteEvent>
+
+    newEvent.Name = name
+    return { Success = true, Value = newEvent }:: Result<RemoteEvent | UnreliableRemoteEvent>
 end
 
 -- Function to create a new signal
-local function CreateSignal(Name: string, Location: Instance, IsReliable: boolean): RemoteEvent | UnreliableRemoteEvent
-    local Validation = ValidateParams(Name, Location)
-    assert(Validation.Success, Validation.Error)
+local function CreateSignal(name: string, location: Instance, isReliable: boolean): RemoteEvent | UnreliableRemoteEvent
+    local validation = ValidateParams(name, location)
+    assert(validation.Success, validation.Error)
 
-    local NewSignal = CreateRemoteInstance(Name, IsReliable)
-    assert(NewSignal.Success, NewSignal.Error)
-    assert(NewSignal.Value, "Error creating signal " .. Name)
+    local newSignal = CreateRemoteInstance(name, isReliable)
+    assert(newSignal.Success, newSignal.Error)
+    assert(newSignal.Value, "Error creating signal " .. name)
 
-    NewSignal.Value.Name = Name
-    NewSignal.Value.Parent = Location
-    return NewSignal.Value
+    newSignal.Value.Name = name
+    newSignal.Value.Parent = location
+    return newSignal.Value
 end
 
 -- Function to get or create an unreliable signal
-local function GetUnreliableEvent(Name: string, Signals: Folder): UnreliableRemoteEvent
-    local NewUnreliableSignal: UnreliableRemoteEvent = Signals:FindFirstChild(Name):: UnreliableRemoteEvent
-    if not NewUnreliableSignal then
-        NewUnreliableSignal = CreateSignal(Name, Signals, false):: UnreliableRemoteEvent
+local function GetUnreliableEvent(name: string, signals: Folder): UnreliableRemoteEvent
+    local newUnreliableSignal: UnreliableRemoteEvent = signals:FindFirstChild(name):: UnreliableRemoteEvent
+    if not newUnreliableSignal then
+        newUnreliableSignal = CreateSignal(name, signals, false):: UnreliableRemoteEvent
     end
 
-    assert(NewUnreliableSignal, "Error finding signal " .. Name)
-    return NewUnreliableSignal
+    assert(newUnreliableSignal, "Error finding signal " .. name)
+    return newUnreliableSignal
 end
 
 -- Function to get or create a signal
-local function GetEvent(Name: string, Signals: Folder): RemoteEvent
-    local NewSignal: RemoteEvent = Signals:FindFirstChild(Name):: RemoteEvent
-    if not NewSignal then
-        NewSignal = CreateSignal(Name, Signals, true):: RemoteEvent
+local function GetEvent(name: string, signals: Folder): RemoteEvent
+    local newSignal: RemoteEvent = signals:FindFirstChild(name):: RemoteEvent
+    if not newSignal then
+        newSignal = CreateSignal(name, signals, true):: RemoteEvent
     end
 
-    assert(NewSignal, "Error finding signal " .. Name)
-    return NewSignal
+    assert(newSignal, "Error finding signal " .. name)
+    return newSignal
 end
 
-local function FindSignal(Name: string, Signals: Folder, IsReliable: boolean): RemoteEvent | UnreliableRemoteEvent
-    local NewSignal = if IsReliable then GetEvent(Name, Signals) else GetUnreliableEvent(Name, Signals)
-    assert(NewSignal.ClassName == "RemoteEvent" or NewSignal.ClassName == "UnreliableRemoteEvent", "Error finding signal " .. Name)
+local function FindSignal(name: string, signals: Folder, isReliable: boolean): RemoteEvent | UnreliableRemoteEvent
+    local newSignal = if isReliable then GetEvent(name, signals) else GetUnreliableEvent(name, signals)
+    assert(newSignal.ClassName == "RemoteEvent" or newSignal.ClassName == "UnreliableRemoteEvent", "Error finding signal " .. name)
 
-    return NewSignal
+    return newSignal
 end
 
 -- Pure function to create function
-local function CreateFunction(Name: string, Location: Instance): RemoteFunction
-    local Validation = ValidateParams(Name, Location)
-    assert(Validation.Success, Validation.Error)
-    
-    local NewFunction = Instance.new("RemoteFunction")
-    NewFunction.Name = Name
-    NewFunction.Parent = Location
+local function CreateFunction(name: string, location: Instance): RemoteFunction
+    local validation = ValidateParams(name, location)
+    assert(validation.Success, validation.Error)
 
-    return NewFunction
+    local newFunction = Instance.new("RemoteFunction")
+    newFunction.Name = name
+    newFunction.Parent = location
+
+    return newFunction
 end
 
 -- Returns a signal based on the name and reliability
-local function ReturnSignal(Name: string, IsReliable: boolean): RemoteEvent | UnreliableRemoteEvent
-    local Remotes = ReplicatedStorage:FindFirstChild("ScryptCommunication"):: Folder
-    assert(Remotes, "Attempt to use event before network was loaded!")
+local function ReturnSignal(name: string, isReliable: boolean): RemoteEvent | UnreliableRemoteEvent
+    local remotes = ReplicatedStorage:FindFirstChild("ScryptCommunication"):: Folder
+    assert(remotes, "Attempt to use event before network was loaded!")
 
-    local Signals = Remotes:FindFirstChild("Signals"):: Folder
-    assert(Signals, "Attempt to use event before network was loaded!")
-    
-    local NewSignal = FindSignal(Name, Signals, IsReliable)
-    assert((NewSignal.ClassName == "RemoteEvent" and IsReliable) or (NewSignal.ClassName == "UnreliableRemoteEvent" and not IsReliable), 
-        "Incorrect remote type! Remotes between the client and server may be out of sync! Signal name: " .. Name)
-    return NewSignal
+    local signals = remotes:FindFirstChild("Signals"):: Folder
+    assert(signals, "Attempt to use event before network was loaded!")
+
+    local newSignal = FindSignal(name, signals, isReliable)
+    assert((newSignal.ClassName == "RemoteEvent" and isReliable) or (newSignal.ClassName == "UnreliableRemoteEvent" and not isReliable),
+        "Incorrect remote type! Remotes between the client and server may be out of sync! Signal name: " .. name)
+    return newSignal
 end
 
 -- Returns a function based on the name
-local function ReturnFunction(Name: string): RemoteFunction
-    local Remotes = ReplicatedStorage:FindFirstChild("ScryptCommunication"):: Folder
-    assert(Remotes, "Attempt to use function before network was loaded!")
+local function ReturnFunction(name: string): RemoteFunction
+    local remotes = ReplicatedStorage:FindFirstChild("ScryptCommunication"):: Folder
+    assert(remotes, "Attempt to use function before network was loaded!")
 
-    local Functions = Remotes:FindFirstChild("Functions")
-    assert(Functions, "Attempt to use function before network was loaded!")
+    local functions = remotes:FindFirstChild("Functions")
+    assert(functions, "Attempt to use function before network was loaded!")
 
-    local NewFunction: RemoteFunction = Functions:FindFirstChild(Name):: RemoteFunction
-    if not NewFunction then
-        NewFunction = CreateFunction(Name, Functions)
+    local newFunction: RemoteFunction = functions:FindFirstChild(name):: RemoteFunction
+    if not newFunction then
+        newFunction = CreateFunction(name, functions)
     end
 
-    assert(NewFunction, "Error finding signal " .. Name)
-    return NewFunction
+    assert(newFunction, "Error finding signal " .. name)
+    return newFunction
 end
 
 -- Pure function to determine remote configuration
-local function DetermineRemoteConfig(Params: RemoteParams): Result<RemoteCreateResult>
-    local RemoteType
-    local ParentFolder = if Params.IsSignal then "Signals" else "Functions"
-    
-    if Params.IsSignal then
-        RemoteType = if Params.Reliable then "RemoteEvent" else "UnreliableRemoteEvent"
+local function DetermineRemoteConfig(params: RemoteParams): Result<RemoteCreateResult>
+    local remoteType
+    local parentFolder = if params.IsSignal then "Signals" else "Functions"
+
+    if params.IsSignal then
+        remoteType = if params.Reliable then "RemoteEvent" else "UnreliableRemoteEvent"
     else
-        RemoteType = "RemoteFunction"
+        remoteType = "RemoteFunction"
     end
-    
+
     return {
         Success = true,
         Value = {
-            RemoteType = RemoteType,
-            Name = Params.Name,
-            Parent = ParentFolder
+            RemoteType = remoteType,
+            Name = params.Name,
+            Parent = parentFolder
         }
     }:: Result<RemoteCreateResult>
 end
 
 -- Creates a remote from a request from the client and returns it
-local function CreateClientRemote(Params: RemoteParams): string
-    local ValidationResult = ValidateRemoteParams(Params)
-    if not ValidationResult.Success then
-        return error(ValidationResult.Error)
+local function CreateClientRemote(params: RemoteParams): string
+    local validationResult = ValidateRemoteParams(params)
+    if not validationResult.Success then
+        return error(validationResult.Error)
     end
-    
-    local ConfigResult = DetermineRemoteConfig(Params)
-    if not ConfigResult.Success then
-        return error(ConfigResult.Error)
-    end
-    
-    local Config = ConfigResult.Value:: RemoteCreateResult
-    local RootFolderResult = VerifyNetworkIntegrity():: Result<Folder>
-    assert(RootFolderResult.Success, RootFolderResult.Error)
 
-    local RootFolder = RootFolderResult.Value:: Folder
+    local configResult = DetermineRemoteConfig(params)
+    if not configResult.Success then
+        return error(configResult.Error)
+    end
+
+    local config = configResult.Value:: RemoteCreateResult
+    local rootFolderResult = VerifyNetworkIntegrity():: Result<Folder>
+    assert(rootFolderResult.Success, rootFolderResult.Error)
+
+    local RootFolder = rootFolderResult.Value:: Folder
     assert(RootFolder, "Error finding root folder")
-    
-    -- Create instance (this is the only impure operation)
-    local NewRemote = Instance.new(Config.RemoteType)
-    NewRemote.Name = Config.Name
-    NewRemote.Parent = RootFolder:FindFirstChild(Config.Parent)
 
-    return NewRemote.Name
+    -- Create instance (this is the only impure operation)
+    local newRemote = Instance.new(config.RemoteType)
+    newRemote.Name = config.Name
+    newRemote.Parent = RootFolder:FindFirstChild(config.Parent)
+
+    return newRemote.Name
 end
 
 local ServerNetwork = {}
@@ -255,23 +255,23 @@ local ServerNetwork = {}
     @yields
     @private
     @within ServerNetwork
-    Private function to initialize the network on the server. 
+    Private function to initialize the network on the server.
     This function should only be called once (by default, Scrypt does this internally).
 ]=]
-function ServerNetwork.Init(): Folder 
-    local RootFolder = VerifyNetworkIntegrity():: Result<Folder>
-    assert(RootFolder.Success, RootFolder.Error)
-    assert(RootFolder.Value, "Error finding root folder")
+function ServerNetwork.Init(): Folder
+    local rootFolder = VerifyNetworkIntegrity():: Result<Folder>
+    assert(rootFolder.Success, rootFolder.Error)
+    assert(rootFolder.Value, "Error finding root folder")
 
-    local FunctionFolder = RootFolder.Value:FindFirstChild("Functions")
-    assert(FunctionFolder, "Error finding functions folder")
+    local functionFolder = rootFolder.Value:FindFirstChild("Functions")
+    assert(functionFolder, "Error finding functions folder")
 
-    if not FunctionFolder:FindFirstChild("CreateRemote") then
-        local NewRemote = Instance.new("RemoteFunction")
-        NewRemote.Name = "CreateRemote"
-        NewRemote.Parent = FunctionFolder
+    if not functionFolder:FindFirstChild("CreateRemote") then
+        local newRemote = Instance.new("RemoteFunction")
+        newRemote.Name = "CreateRemote"
+        newRemote.Parent = functionFolder
 
-        NewRemote.OnServerInvoke = function(Player, IsSignal: boolean, Name: string, Reliable: boolean)
+        newRemote.OnServerInvoke = function(Player, IsSignal: boolean, Name: string, Reliable: boolean)
             local RemoteCreateParams = {
                 Player = Player,
                 IsSignal = IsSignal,
@@ -282,8 +282,8 @@ function ServerNetwork.Init(): Folder
             return CreateClientRemote(RemoteCreateParams)
         end
     end
-    
-    return RootFolder.Value
+
+    return rootFolder.Value
 end
 
 --[=[
@@ -295,12 +295,12 @@ end
 function ServerNetwork.SendPacketToClient(Name: string, PacketData: ServerPacketData)
     assert(Name, "Expected string as first argument.")
     assert(PacketData, "Expected ServerPacketData as second argument.")
-    
-    local Signal = ReturnSignal(Name, PacketData.Reliable)
-    if Signal.ClassName == "RemoteEvent" then
-        (Signal:: RemoteEvent):FireClient(PacketData.Address, PacketData.Data)
+
+    local signal = ReturnSignal(Name, PacketData.Reliable)
+    if signal.ClassName == "RemoteEvent" then
+        (signal:: RemoteEvent):FireClient(PacketData.Address, typeof(PacketData.Data) == "Instance", PacketData.Data:GetFullName())
     else
-        (Signal:: UnreliableRemoteEvent):FireClient(PacketData.Address, PacketData.Data)
+        (signal:: UnreliableRemoteEvent):FireClient(PacketData.Address, typeof(PacketData.Data) == "Instance", PacketData.Data)
     end
 end
 
@@ -316,13 +316,13 @@ function ServerNetwork.SendPacketToAllClients(Name: string, Packet: Packet, IsRe
     assert(Packet, "Expected ServerPacketData as second argument.")
 
     for _, player in ipairs(Players:GetPlayers()) do
-        local PlayerPacket = {
+        local playerPacket = {
             Address = player,
             Data = Packet,
             Reliable = IsReliable
         }:: ServerPacketData
 
-        ServerNetwork.SendPacketToClient(Name, PlayerPacket)
+        ServerNetwork.SendPacketToClient(Name, playerPacket)
     end
 end
 
@@ -337,12 +337,12 @@ function ServerNetwork.PingClient(Name: string, Address: Player, IsReliable: boo
     assert(Name, "Expected string as first argument.")
     assert(Address, "Expected Player as second argument.")
     assert(typeof(IsReliable) == "boolean", "Expected boolean as third argument.")
-    
-    local Signal = ReturnSignal(Name, IsReliable)
-    if Signal.ClassName == "RemoteEvent" then
-        (Signal:: RemoteEvent):FireClient(Address)
+
+    local signal = ReturnSignal(Name, IsReliable)
+    if signal.ClassName == "RemoteEvent" then
+        (signal:: RemoteEvent):FireClient(Address)
     else
-        (Signal:: UnreliableRemoteEvent):FireClient(Address)
+        (signal:: UnreliableRemoteEvent):FireClient(Address)
     end
 end
 
@@ -355,7 +355,7 @@ end
 function ServerNetwork.PingAllClients(Name: string, IsReliable: boolean)
     assert(Name, "Expected string as first argument.")
     assert(typeof(IsReliable) == "boolean", "Expected boolean as second argument.")
-    
+
     for _, player in ipairs(Players:GetPlayers()) do
         ServerNetwork.PingClient(Name, player, IsReliable)
     end
@@ -373,19 +373,19 @@ function ServerNetwork.ListenForPacket(Name: string, IsReliable: boolean, Callba
     assert(Name, "Expected string as first argument.")
     assert(Callback, "Expected boolean as second argument.")
     assert(Callback, "Expected function as third argument.")
-    
-    local Connection
-    local Signal = ReturnSignal(Name, IsReliable)
-    assert(Signal, "Error finding signal " .. Name)
 
-    if Signal.ClassName == "RemoteEvent" then
-        Connection = (Signal:: RemoteEvent).OnServerEvent:Connect(Callback)
+    local connection
+    local signal = ReturnSignal(Name, IsReliable)
+    assert(signal, "Error finding signal " .. Name)
+
+    if signal.ClassName == "RemoteEvent" then
+        connection = (signal:: RemoteEvent).OnServerEvent:Connect(Callback)
     else
-        Connection = (Signal:: UnreliableRemoteEvent).OnServerEvent:Connect(Callback)
+        connection = (signal:: UnreliableRemoteEvent).OnServerEvent:Connect(Callback)
     end
 
-    assert(Connection, "Error connecting to signal " .. Name)
-    return Connection
+    assert(connection, "Error connecting to signal " .. Name)
+    return connection
 end
 
 --[=[
@@ -398,7 +398,7 @@ end
 function ServerNetwork.ListenForRequest(Name: string, Callback: (Address: Player, ...Packet?) -> ...any): ()
     assert(Name, "Expected string as first argument.")
     assert(Callback, "Expected function as second argument.")
-    
+
     local Function = ReturnFunction(Name)
     Function.OnServerInvoke = Callback
 end

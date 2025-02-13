@@ -6,7 +6,7 @@
 	@file Controllers.lua
     @client
     @author zblox164
-    @version 0.0.4-alpha
+    @version 0.0.5-alpha
     @since 2024-12-17
 --]]
 
@@ -26,80 +26,80 @@ end
 
 -- Utilities
 -- Pure function to filter a table
-local function Filter<T>(Table: {T}, Predicate: (value: T) -> boolean): {T}
+local function Filter<T>(Table: {T}, predicate: (value: T) -> boolean): {T}
 	assert(Table, "Table is not valid")
-	assert(typeof(Predicate) == "function", "Predicate function expected as second argument")
+	assert(typeof(predicate) == "function", "Predicate function expected as second argument")
 
-	local NewTable = {}
+	local newTable = {}
 
 	for Index, Value in ipairs(Table) do
-		if not Predicate(Value) then continue end
-		table.insert(NewTable, Value)
+		if not predicate(Value) then continue end
+		table.insert(newTable, Value)
 	end
 
-	return NewTable
+	return newTable
 end
 
 -- Pure function to accumulate a table
-local function Reduce<T, U>(Table: {T}, Func: (accumulator: U, value: T) -> U, Initial: U): U
+local function Reduce<T, U>(Table: {T}, func: (accumulator: U, value: T) -> U, Initial: U): U
 	assert(Table, "Table is not valid")
-	assert(typeof(Func) == "function", "Function expected as second argument")
+	assert(typeof(func) == "function", "Function expected as second argument")
 
-	local Result = Initial
+	local result = Initial
 	for _, v in ipairs(Table) do
-		Result = Func(Result, v)
+		result = func(result, v)
 	end
 
-	return Result
+	return result
 end
 
 -- Pure function to create a service object
-local function CreateController(Module: ModuleScript): Controller
+local function CreateController(module: ModuleScript): Controller
 	return {
-		["Name"] = tostring(Module),
-		["Controller"] = Module
+		["Name"] = tostring(module),
+		["Controller"] = module
 	}
 end
 
 -- Pure function to check if module can be loaded
-local function IsLoadableModule(Module: Instance): boolean
-	if not (typeof(Module) == "Instance") then return false end
-    return Module:IsA("ModuleScript") and not Module:GetAttribute("ManualLoad")
+local function IsLoadableModule(module: Instance): boolean
+	if not (typeof(module) == "Instance") then return false end
+    return module:IsA("ModuleScript") and not module:GetAttribute("ManualLoad")
 end
 
 -- Pure function to check if module name exists
-local function IsModuleNameUnique<T>(ModuleName: string, Modules: {[string]: T}): boolean
-    return not Modules[ModuleName]
+local function IsModuleNameUnique<T>(moduleName: string, modules: {[string]: T}): boolean
+    return not modules[moduleName]
 end
 
 -- Loads a controller
-local function LoadController<T>(Module: ModuleScript, Modules: {[string]: {Controller}}): {[string]: T}
-    if not IsLoadableModule(Module) then
-        return Modules
+local function LoadController<T>(module: ModuleScript, modules: {[string]: {Controller}}): {[string]: T}
+    if not IsLoadableModule(module) then
+        return modules
     end
 
-    local ModuleName = tostring(Module)
-    if not IsModuleNameUnique(ModuleName, Modules) then
-        error(`{ModuleName} has already been loaded!`)
+    local moduleName = tostring(module)
+    if not IsModuleNameUnique(moduleName, modules) then
+        error(`{moduleName} has already been loaded!`)
     end
 
-    local NewModules = table.clone(Modules):: {[string]: Controller}
-    NewModules[ModuleName:: string] = CreateController(Module)
-    return NewModules
+    local newModules = table.clone(modules):: {[string]: Controller}
+    newModules[moduleName:: string] = CreateController(module)
+    return newModules
 end
 
 -- Returns a table of controllers
-local function FindModules(Root: Instance, Modules: {[string]: Controller}): {[string]: Controller}
-	local Children: {Instance} = Root:GetChildren()
-	
+local function FindModules(root: Instance, modules: {[string]: Controller}): {[string]: Controller}
+	local children: {Instance} = root:GetChildren()
+
 	-- Filter loadable modules
-	local LoadableModules: {Instance} = Filter(Children, IsLoadableModule)
-	local Directories: {Instance} = Filter(Children, function(child: Instance) 
-		return #child:GetChildren() > 0 
+	local loadableModules: {Instance} = Filter(children, IsLoadableModule)
+	local directories: {Instance} = Filter(children, function(child: Instance)
+		return #child:GetChildren() > 0
 	end)
-	
+
 	-- Load all modules and get their return values
-	local NewModules = Reduce(LoadableModules, function(accumulatedServices: {[string]: Controller}, module: Instance)
+	local newModules = Reduce(loadableModules, function(accumulatedServices: {[string]: Controller}, module: Instance)
 		local Module = LoadController(module:: ModuleScript, accumulatedServices:: {[string]: any})
 
 		if Module and module:IsA("ModuleScript") then
@@ -107,11 +107,11 @@ local function FindModules(Root: Instance, Modules: {[string]: Controller}): {[s
 		end
 
 		return accumulatedServices
-	end, table.clone(Modules))
-	
-	return Reduce(Directories, function(Accumulator: {[string]: Controller}, Directory: Instance)
-		return FindModules(Directory, Accumulator)
-	end, NewModules):: {[string]: Controller}
+	end, table.clone(modules))
+
+	return Reduce(directories, function(accumulator: {[string]: Controller}, directory: Instance)
+		return FindModules(directory, accumulator)
+	end, newModules):: {[string]: Controller}
 end
 
 return FindModules

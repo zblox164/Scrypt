@@ -5,9 +5,8 @@ sidebar_position: 1
 # Getting Started
 
 :::danger NOTICE
-Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please contact zblox164 and provide relevant details.
+Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please create an issue on the GitHub repository.
 :::
-
 
 ## Installation
 Installing Scrypt only requires a few simple steps! To start the installation process, you'll first need to get the Scrypt framework. Currently, there are two methods to do this:
@@ -149,6 +148,11 @@ Scrypt.Services.Players.PlayerAdded:Connect(function(Player: Player)
 end)
 ```
 
+:::info
+When sending instances from the server to the client, if the instance hasn't replicated yet, Scrypt allows you to run the method :Replicate() to wait until the instance has replicated to the client. This function returns the instance object when it replicates. This only happens when the instance is nil on the client so it is advised to check if the instance exists before running this method.
+:::
+
+
 ### require() Replacement
 So far the examples have only shown the built in features of Scrypt. You might be asking yourself, *"how can I build a game with this?"*. The answer is you can use Scrypt to lazily load game modules for you. To utilize this, create a new `ModuleScript` under `ReplicatedStorage/Shared/Modules`. You can make this module contain whatever you want. For now, let's just use this as an example:
 
@@ -208,4 +212,7 @@ Services and Controllers have their own 'Get' functions. See the API or specific
 
 ---
 
-More coming soon!
+Features not shown on this page:
+* Maybe Monad (separate page wip)
+* Utils
+* GUI (coming soon)

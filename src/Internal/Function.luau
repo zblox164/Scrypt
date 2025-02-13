@@ -6,7 +6,7 @@
 	@file Function.lua
     @shared
     @author zblox164
-    @version 0.1.0-beta
+    @version 0.1.1-beta
     @since 2024-12-17
 --]]
 
@@ -29,11 +29,11 @@ export type FunctionImpl = {
 
 -- Create new custom function
 function Function.New(): Function
-	local FunctionInfo = {
+	local functionInfo = {
 		Function = nil,
 		YieldedCalls = {}:: {thread?}
 	}:: Function
-	return setmetatable(FunctionInfo, Function)
+	return setmetatable(functionInfo, Function)
 end
 
 -- Set the OnInvoke function
@@ -46,14 +46,14 @@ end
 function Function:Invoke(...: any): ...any	
 	assert(self.Function, "Function is not valid.")
 
-	local Result = self.Function(...)
+	local result = self.Function(...)
 
 	for index, yield in ipairs(self.YieldedCalls) do
-		coroutine.resume(yield:: thread, Result)
+		coroutine.resume(yield:: thread, result)
 		table.remove(self.YieldedCalls, index)
 	end
 
-	return Result
+	return result
 end
 
 -- Destroys a function and its connections

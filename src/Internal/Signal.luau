@@ -6,7 +6,7 @@
 	@file Signal.lua
     @shared
     @author zblox164
-    @version 0.1.0-beta
+    @version 0.1.1-beta
     @since 2024-12-17
 --]]
 
@@ -66,29 +66,29 @@ end
 function Signal:Connect(Function: CallbackFunction): SignalConnection?	
 	assert(Function and typeof(Function) == "function", `"Expected 'function' got: {typeof(Function)}`)
 
-	local ConnectionInfo = {
+	local connectionInfo = {
 		Function = Function,
 		IsOnce = false,
 		Self = self,
 	}
-	local NewConnection = setmetatable(ConnectionInfo, Connection)
+	local newConnection = setmetatable(connectionInfo, Connection)
 
-	table.insert(self.Connections, NewConnection)
-	return NewConnection
+	table.insert(self.Connections, newConnection)
+	return newConnection
 end
 
 function Signal:Once(Function: CallbackFunction): SignalConnection
 	assert(Function and typeof(Function) == "function", `"Expected 'function' got: {typeof(Function)}`)
 
-	local ConnectionInfo = {
+	local connectionInfo = {
 		Function = Function,
 		IsOnce = true,
 		Self = self,
 	}
-	local NewConnection = setmetatable(ConnectionInfo, Connection)
+	local newConnection = setmetatable(connectionInfo, Connection)
 
-	table.insert(self.Connections, NewConnection)
-	return NewConnection
+	table.insert(self.Connections, newConnection)
+	return newConnection
 end
 
 -- Waits for the signal to fire

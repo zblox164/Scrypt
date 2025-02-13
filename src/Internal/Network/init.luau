@@ -5,7 +5,7 @@
 	@file Network.luau
     @shared
     @author zblox164
-    @version 0.0.4-alpha
+    @version 0.0.5-alpha
     @since 2024-12-17
 --]]
 

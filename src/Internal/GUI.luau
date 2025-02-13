@@ -5,13 +5,9 @@
 	@file GUI.luau (Scrypt)
     @client
     @author zblox164
-    @version 0.0.43-alpha
+    @version 0.0.5-alpha
     @since 2024-12-17
 --]]
-
-local Scrypt = require(game:GetService("ReplicatedStorage").Scrypt)
-Scrypt.Init()
-
 
 -- Types
 type GUI = {[string]: {[string]: GuiObject} | {Root: ScreenGui}}
@@ -21,16 +17,20 @@ type Result<T> = {Success: boolean, Value: T?, Error: string?}
 -- Constants
 local IGNORED_GUIS = table.freeze({"Freecam", "BubbleChat", "Chat"})
 
+-- Variables
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local StarterGui = game:GetService("StarterGui")
+
 -- Function to wait for PlayerGui to be populated
 local function WaitForPlayerGui(): PlayerGui
-	local PlayerGui = Scrypt.LocalPlayer:WaitForChild("PlayerGui")
+	local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-	for _, ScreenUI in ipairs(Scrypt.Services.StarterGui:GetChildren()) do
+	for _, ScreenUI in ipairs(StarterGui:GetChildren()) do
 		if not ScreenUI:IsA("ScreenGui") then continue end
-		PlayerGui:WaitForChild(ScreenUI.Name)
+		playerGui:WaitForChild(ScreenUI.Name)
 	end
 
-	return PlayerGui:: PlayerGui
+	return playerGui:: PlayerGui
 end
 
 -- Validate element
@@ -99,6 +99,7 @@ local function CreateProtectedInterface(raw: GUI): GUINamespace
         end,
         __metatable = "Locked"
     }
+
     return setmetatable(protected, metaTable)
 end
 

@@ -5,27 +5,27 @@ local Utils = {}
 function Utils.Map<T, RETURN>(Table: {T}, Mapping: (value: T) -> RETURN)
 	assert(type(Table) == "table", "Expected a table as the first argument.")
     assert(typeof(Mapping) == "function", "Expected a function as the second argument.")
-	
-	local NewTable = table.create(#Table)
+
+	local newTable = table.create(#Table)
 
 	for Index, Value in pairs(Table) do
-		NewTable[Index] = Mapping(Value)
+		newTable[Index] = Mapping(Value)
 	end
 
-	return NewTable
+	return newTable
 end
 
 -- Runs a reducer function on a table and returns a single value based on the accumulator
-function Utils.Reduce<T, U>(Table: {T}, Func: (accumulator: U, value: T) -> U, Initial: U): U
+function Utils.Reduce<T, U>(Table: {T}, Function: (accumulator: U, value: T) -> U, Initial: U): U
 	assert(Table, "Table is not valid")
-	assert(typeof(Func) == "function", "Function expected as second argument")
+	assert(typeof(Function) == "function", "Function expected as second argument")
 
-	local Result = Initial
+	local result = Initial
 	for _, v in ipairs(Table) do
-		Result = Func(Result, v)
+		result = Function(result, v)
 	end
 
-	return Result
+	return result
 end
 
 -- Filters out values in a table based on the predicate function
@@ -33,14 +33,14 @@ function Utils.Filter<T>(Table: {T}, Predicate: (value: T) -> boolean): {T}
 	assert(Table, "Table is not valid")
 	assert(typeof(Predicate) == "function", "Predicate function expected as second argument")
 
-	local NewTable = {}
+	local newTable = {}
 
-	for Index, Value in pairs(Table) do
-		if not Predicate(Value) then continue end
-		table.insert(NewTable, Value)
+	for index, value in pairs(Table) do
+		if not Predicate(value) then continue end
+		table.insert(newTable, value)
 	end
 
-	return NewTable
+	return newTable
 end
 
 -- Returns if a value is empty

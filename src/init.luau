@@ -5,7 +5,7 @@
 	@file Scrypt.lua
     @shared
     @author zblox164
-    @version 0.0.41-alpha
+    @version 0.0.5-alpha
     @since 2024-12-17
 --]]
 
@@ -16,10 +16,10 @@ local function GetServer()
 end
 
 local function GetClient()
-	task.defer(function() 
-		script:WaitForChild("Server"):Destroy() 
+	task.defer(function()
+		script:WaitForChild("Server"):Destroy()
 	end)
-	
+
 	return require(script.Client)
 end
 
@@ -30,7 +30,6 @@ local function Scrypt()
 		return GetClient()
 	end
 end
-
 
 -- Public Types
 export type Result<T> = {
@@ -51,7 +50,6 @@ export type ServerPacketData = {
 	Address: Player
 }
 
-
 export type Service = {
 	["Name"]: string,
 	["Service"]: any
@@ -63,15 +61,5 @@ export type Controller = {
 }
 
 export type SharedModule = {[string]: any}
-
-export type Signal = typeof(setmetatable({}:: {
-	Connections: {Signal.SignalConnection?},
-	YieldedConnections: {thread?}
-}, {}:: Signal.SignalImpl))
-
-export type Function = typeof(setmetatable({}:: {
-	Function: ((...any) -> ...any)?,
-	YieldedCalls: {thread?}
-}, {}:: Function.FunctionImpl))
 
 return Scrypt()

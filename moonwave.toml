@@ -2,7 +2,6 @@ title = "Scrypt"
 gitRepoUrl = "https://github.com/zblox164/Scrypt"
 gitSourceBranch = "main"
 
-
 classOrder = [
     "ScryptClient",
     "ScryptServer",

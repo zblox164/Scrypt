@@ -5,7 +5,7 @@ sidebar_position: 3
 # Controllers
 
 :::danger NOTICE
-Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please contact zblox164 and provide relevant details.
+Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please create an issue on the GitHub repository.
 :::
 
 ## What are Controllers?

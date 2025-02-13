@@ -5,7 +5,7 @@ sidebar_position: 2
 # About
 
 :::danger NOTICE
-Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please contact zblox164 and provide relevant details.
+Scrypt is in very **early stages** of development. Expect changes and bugs during this phase. If you find a bug or have a suggestion for how to improve Scrypt, please create an issue on the GitHub repository.
 :::
 
 ## What is Scrypt?
@@ -15,6 +15,7 @@ Scrypt is a lightweight Roblox development framework. Scrypt aims to be an easy-
 * Built in networking
 * Support for three types of modules (Services, Controllers, Shared modules)
 * Built-in Utilities (Custom events and functions, roblox service access, and more)
+* Easy Gui access
 
 Scrypt is planned on being supported for many years to come and much more is planned to be added!
 

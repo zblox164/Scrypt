@@ -1,3 +1,11 @@
+## v0.0.5-alpha
+#### 02/13/2025
+* Added the Maybe monad
+* Added functionality the network system when sending instances from server to client
+* Added StarterPack and StarterPlayer to the RBXServices script. Both can now be used like any other Roblox Service
+* Minor code improvements
+* Minor docs improvements
+
 ## v0.0.43-alpha
 #### 01/23/2025
 * Fixed major framework load bug
