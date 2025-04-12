@@ -6,7 +6,7 @@
 	@file ClientNetwork.luau
     @server
     @author zblox164
-    @version 0.0.5-alpha
+    @version 0.0.51-alpha
     @since 2024-12-17
 --]]
 
@@ -296,11 +296,17 @@ function ServerNetwork.SendPacketToClient(Name: string, PacketData: ServerPacket
     assert(Name, "Expected string as first argument.")
     assert(PacketData, "Expected ServerPacketData as second argument.")
 
+    local packetType = typeof(PacketData.Data)
+    local isInstance = packetType == "Instance"
+    local sendData = if isInstance
+        then PacketData.Data:GetFullName()
+        else PacketData.Data
+
     local signal = ReturnSignal(Name, PacketData.Reliable)
     if signal.ClassName == "RemoteEvent" then
-        (signal:: RemoteEvent):FireClient(PacketData.Address, typeof(PacketData.Data) == "Instance", PacketData.Data:GetFullName())
+        (signal:: RemoteEvent):FireClient(PacketData.Address, isInstance, sendData)
     else
-        (signal:: UnreliableRemoteEvent):FireClient(PacketData.Address, typeof(PacketData.Data) == "Instance", PacketData.Data)
+        (signal:: UnreliableRemoteEvent):FireClient(PacketData.Address, isInstance, sendData)
     end
 end
 

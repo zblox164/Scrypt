@@ -150,6 +150,31 @@ end)
 
 :::info
 When sending instances from the server to the client, if the instance hasn't replicated yet, Scrypt allows you to run the method :Replicate() to wait until the instance has replicated to the client. This function returns the instance object when it replicates. This only happens when the instance is nil on the client so it is advised to check if the instance exists before running this method.
+```lua
+--@server
+-- Data to client
+Scrypt.Services.Players.PlayerAdded:Connect(function(Player: Player)
+	local NewPart = Instance.new("Part")
+	NewPart.Name = "SendFromServer"
+	NewPart.Parent = workspace
+
+	local Packet = {
+		Data = NewPart,
+		Reliable = true,
+		Address = Player
+	}
+	Scrypt.ServerNetwork.SendPacketToClient("Receive", Packet)	
+end)
+```
+```lua
+--@client
+-- From Server
+local FromServer
+FromServer = Scrypt.ClientNetwork.ListenForPacket("Receive", true, function(SentInstance) 
+	local Object = SentInstance:Replicate()
+	print(Object.Name) -> 'SentFromServer'
+end)
+```
 :::
 
 
@@ -210,9 +235,19 @@ All modules are lazily loaded! This means modules are only loaded when they are 
 Services and Controllers have their own 'Get' functions. See the API or specific doc pages for more details.
 :::
 
+### GUI Interaction
+Scrypt allows for easy access to your UI elements through the use of the `Scrypt.GUI` property. This property returns a lazily loaded dictionary of all of your UI elements. Since this table is lazily loaded, if you try to print out the elements stored in the GUI property, you'll simply be returned an empty table. Elements are only returned when indexed. For example, if you had a ScreenGui in StarterGui with a frame as a child, if you index `Scrypt.GUI.ScreenGui`, the GUI table would return:
+```lua
+{
+	["Frame"] = Frame,
+	["Root"] = ScreenGui
+}
+```
+
+Notice how this does not return the `ScreenGui` object but rather a dictionary of the immediate children of that `ScreenGui` as well as a `Root` key to easily access the `ScreenGui` if needed. If you are trying to access the `Frame`, you can index it by name. For any children under the `Frame`, you can access them through any regular method as you now have a reference to the `Frame` object and not a dictionary.
+
 ---
 
 Features not shown on this page:
 * Maybe Monad (separate page wip)
 * Utils
-* GUI (coming soon)

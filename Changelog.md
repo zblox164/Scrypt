@@ -1,3 +1,12 @@
+## v0.0.51-alpha
+#### 04/12/2025
+* Fixed network bug where non instances would cause errors (as a result of the replicate feature)
+* Fixed minor issues
+* Minor improvements
+* Improvements to documentation
+    * Added information for GUI module on the 'Getting Started' page
+    * Added information for replicate feature
+
 ## v0.0.5-alpha
 #### 02/13/2025
 * Added the Maybe monad

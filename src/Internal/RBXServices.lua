@@ -30,6 +30,7 @@ return {
 
 	MarketplaceService = game:GetService("MarketplaceService"), -- M
 	MaterialService = game:GetService("MaterialService"),
+	MatchmakingService = game:GetService("MatchmakingService"),
 	MemoryStoreService = game:GetService("MemoryStoreService"),
 	MessagingService = game:GetService("MessagingService"),
 

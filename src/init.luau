@@ -5,7 +5,7 @@
 	@file Scrypt.lua
     @shared
     @author zblox164
-    @version 0.0.5-alpha
+    @version 0.0.51-alpha
     @since 2024-12-17
 --]]
 

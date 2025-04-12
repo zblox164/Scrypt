@@ -6,7 +6,7 @@
 	@file Server.lua (Scrypt)
     @server
     @author zblox164
-    @version 0.0.5-alpha
+    @version 0.0.51-alpha
     @since 2024-12-17
 --]]
 
@@ -343,7 +343,7 @@ function ScryptServer.Init(EnvironmentLocation: Instance?): Signal
 	if RBXServices.RunService:IsStudio() then
 		task.delay(0, SetupFeatures, EnvironmentLocation)
 	else
-		task.spawn(SetupFeatures)
+		task.defer(SetupFeatures)
 	end
 
 	return Loaded
