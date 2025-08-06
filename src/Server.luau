@@ -6,7 +6,7 @@
 	@file Server.lua (Scrypt)
     @server
     @author zblox164
-    @version 0.0.51-alpha
+    @version 0.0.52-alpha
     @since 2024-12-17
 --]]
 
@@ -31,20 +31,8 @@
 ]=]
 
 --[=[
-	@prop RegExp RegularExpressionClass
-	@within ScryptServer
-	Regular expressions module published by Roblox. See more information in RegEx.lua.
-]=]
-
---[=[
 	@prop Monad MonadClass
 	@within ScryptServer
-]=]
-
---[=[
-	@prop Promise PromiseClass
-	@within ScryptServer
-	Promise module created by evaera.
 ]=]
 
 --[=[
@@ -77,9 +65,7 @@ ScryptServer.LocalPlayer = newproxy():: Player -- For better Intellisense on the
 local Function = require(script.Parent.Internal.Function)
 local RBXServices = require(script.Parent.Internal.RBXServices)
 local Signal = require(script.Parent.Internal.Signal)
-local Promise = require(script.Parent.Internal.Promise)
 local Symbol = require(script.Parent.Internal.Symbol)
-local RegularExpressions = require(script.Parent.Internal.LuauRegExp)
 local Monad = require(script.Parent.Internal.Monad)
 local Loaded = Signal.New("Loaded", true)
 
@@ -209,9 +195,7 @@ end
 
 -- Loads all built in features
 local function SetupBuiltInFeatures()
-	ScryptServer.Promise = Promise
 	ScryptServer.Symbol = Symbol
-	ScryptServer.RegExp = RegularExpressions
 	ScryptServer.Monad = Monad
 
 	local network = require(script.Parent.Internal.Network)
@@ -364,7 +348,6 @@ type Result<T> = {
 }
 
 type GUI = {[string]: {[string]: GuiObject}}
-
 type SharedModule = {[string]: any}
 
 type Maybe<T> = {
@@ -386,7 +369,7 @@ type Function = typeof(setmetatable({}:: {
 	YieldedCalls: {thread?}
 }, {}:: Function.FunctionImpl))
 
-type Packet = number | string | {ClientPacketData} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
+type Packet = number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor | {[string]: Packet}
 type ClientPacketData = {
     Data: Packet,
     Reliable: boolean
@@ -395,9 +378,10 @@ type ClientPacketData = {
 type ClientNetwork = {
     SendPacket: (Name: string, Packet: ClientPacketData) -> (),
     PingServer: (Name: string, IsReliable: boolean) -> (),
-    RequestPacket: (Name: string, Packet: Packet) -> Packet,
-    EmptyRequest: (Name: string) -> Packet,
+    RequestPacket: (Name: string, Packet: ClientPacketData) -> Packet,
+    Request: (Name: string) -> Packet,
     ListenForPacket: (Name: string, IsReliable: boolean, Callback: (...ClientPacketData) -> ()) -> RBXScriptConnection,
+    Listen: (Name: string, IsReliable: boolean, Callback: () -> ()) -> RBXScriptConnection,
     Init: () -> Folder,
 }
 

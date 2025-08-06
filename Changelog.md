@@ -1,3 +1,18 @@
+## v0.0.52-alpha
+#### 08/05/2025
+* Added new function to ServerNetwork: 'Listen'
+* Added new function to ServerNetwork: 'ListenForRequest'
+* Added new function to ClientNetwork: 'Listen'
+* Added extra type support for network packets
+* Removed Promise and RegExp modules
+* Renamed 'ListenForRequest' to 'ListenForRequestPacket'
+* Renamed 'EmptyRequest' to 'Request'
+* Added unadded Roblox services to RBXServices.luau
+* Minor bug fixes
+* Minor improvements
+* Improvements to documentation
+    * Minor improvements
+
 ## v0.0.51-alpha
 #### 04/12/2025
 * Fixed network bug where non instances would cause errors (as a result of the replicate feature)

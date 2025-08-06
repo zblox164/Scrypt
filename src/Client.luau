@@ -6,7 +6,7 @@
 	@file Server.lua (Scrypt)
     @client
     @author zblox164
-    @version 0.0.51-alpha
+    @version 0.0.52-alpha
     @since 2024-12-17
 --]]
 
@@ -36,20 +36,8 @@
 ]=]
 
 --[=[
-	@prop RegExp RegularExpressionClass
-	@within ScryptClient
-	Regular expressions module published by Roblox. See more information in RegEx.lua.
-]=]
-
---[=[
 	@prop Monad MonadClass
 	@within ScryptClient
-]=]
-
---[=[
-	@prop Promise PromiseClass
-	@within ScryptClient
-	Promise module created by evaera.
 ]=]
 
 --[=[
@@ -92,9 +80,7 @@ local Shared = {}:: {[string]: any}
 local Function = require(script.Parent.Internal.Function)
 local RBXServices = require(script.Parent.Internal.RBXServices)
 local Signal = require(script.Parent.Internal.Signal)
-local Promise = require(script.Parent.Internal.Promise)
 local Symbol = require(script.Parent.Internal.Symbol)
-local RegularExpressions = require(script.Parent.Internal.LuauRegExp)
 local Monad = require(script.Parent.Internal.Monad)
 local Loaded = Signal.New("Loaded", true)
 
@@ -244,9 +230,7 @@ local function LoadSharedModules(): {[string]: ModuleScript}
 end
 
 local function SetupBuiltInFeatures()
-	ScryptClient.Promise = Promise
 	ScryptClient.Symbol = Symbol
-	ScryptClient.RegExp = RegularExpressions
 	ScryptClient.Monad = Monad
 
 	local network = require(script.Parent.Internal.Network)
@@ -392,8 +376,8 @@ type Controller = {
 }
 
 type Maybe<T> = {
-    bind: (fn: (T) -> Maybe<T>) -> Maybe<T>,
-    map: (fn: (T) -> T) -> Maybe<T>,
+    bind: (func: (T) -> Maybe<T>) -> Maybe<T>,
+    map: (func: (T) -> T) -> Maybe<T>,
     fromMaybe: (default: T) -> T,
     isJust: () -> boolean,
     isNothing: () -> boolean,

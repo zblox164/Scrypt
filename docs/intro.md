@@ -22,10 +22,10 @@ Installing Scrypt only requires a few simple steps! To start the installation pr
 ---
 
 Once you've imported Scrypt into your project, you can begin the next step. Scrypt should come with a root folder that contains several items, each needs to be moved:
-* Scrypt module
-* Services folder
-* Controllers folder
-* Shared folder
+* Scrypt module -> `game/ReplicatedStorage`
+* Controllers folder -> `game/ReplicatedStorage`
+* Shared folder -> `game/ReplicatedStorage`
+* Services folder -> `game/ServerScriptService`
 
 After you've moved all the framework components to the proper locations, you can begin using the framework.
 
@@ -107,7 +107,7 @@ Scrypt.Init():Wait()
 local Packet = {
 	Data = "Data being sent to server",
 	Reliable = true 
-}
+}:: Scrypt.ClientPacketData
 Scrypt.ClientNetwork.SendPacket("Send", Packet)
 
 local RequestToServer = Scrypt.ClientNetwork.RequestPacket("Request", "Data being sent to server")
@@ -143,13 +143,13 @@ Scrypt.Services.Players.PlayerAdded:Connect(function(Player: Player)
 		Data = "Data being sent from server",
 		Reliable = true,
 		Address = Player
-	}
+	}:: Scrypt.ServerPacketData
 	Scrypt.ServerNetwork.SendPacketToClient("Receive", Packet)	
 end)
 ```
 
 :::info
-When sending instances from the server to the client, if the instance hasn't replicated yet, Scrypt allows you to run the method :Replicate() to wait until the instance has replicated to the client. This function returns the instance object when it replicates. This only happens when the instance is nil on the client so it is advised to check if the instance exists before running this method.
+When sending instances from the server to the client, if the instance hasn't replicated yet, Scrypt allows you to run the method `:Replicate()` to wait until the instance has replicated to the client. This function returns the instance object when it replicates. This only happens when the instance is nil on the client so it is advised to check if the instance exists before running this method.
 ```lua
 --@server
 -- Data to client
@@ -162,7 +162,7 @@ Scrypt.Services.Players.PlayerAdded:Connect(function(Player: Player)
 		Data = NewPart,
 		Reliable = true,
 		Address = Player
-	}
+	}:: Scrypt.ServerPacketData
 	Scrypt.ServerNetwork.SendPacketToClient("Receive", Packet)	
 end)
 ```
@@ -179,7 +179,7 @@ end)
 
 
 ### require() Replacement
-So far the examples have only shown the built in features of Scrypt. You might be asking yourself, *"how can I build a game with this?"*. The answer is you can use Scrypt to lazily load game modules for you. To utilize this, create a new `ModuleScript` under `ReplicatedStorage/Shared/Modules`. You can make this module contain whatever you want. For now, let's just use this as an example:
+So far, the examples have only shown the built in features of Scrypt. You might be asking yourself, *"how can I build a game with this?"*. The answer is you can use Scrypt to lazily load game modules for you. To utilize this, create a new `ModuleScript` under `ReplicatedStorage/Shared/Modules`. You can make this module contain whatever you want. For now, let's just use this as an example:
 
 ```lua
 --!strict
@@ -244,7 +244,7 @@ Scrypt allows for easy access to your UI elements through the use of the `Scrypt
 }
 ```
 
-Notice how this does not return the `ScreenGui` object but rather a dictionary of the immediate children of that `ScreenGui` as well as a `Root` key to easily access the `ScreenGui` if needed. If you are trying to access the `Frame`, you can index it by name. For any children under the `Frame`, you can access them through any regular method as you now have a reference to the `Frame` object and not a dictionary.
+Notice how this does not return the `ScreenGui` object, but rather a dictionary of the immediate children of that `ScreenGui` as well as a `Root` key to easily access the `ScreenGui`. If you are trying to access the `Frame`, you can index it by name. For any children under the `Frame`, you can access them through any regular method (dot notation, FindFirstChild, etc...) as you now have a reference to the `Frame` object and not a dictionary.
 
 ---
 

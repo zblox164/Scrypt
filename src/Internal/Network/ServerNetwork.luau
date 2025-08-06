@@ -6,7 +6,7 @@
 	@file ClientNetwork.luau
     @server
     @author zblox164
-    @version 0.0.51-alpha
+    @version 0.0.52-alpha
     @since 2024-12-17
 --]]
 
@@ -20,7 +20,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 --[=[
-    @type Packet = number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
+    @type Packet number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor | {[string]: Packet}
     @within ServerNetwork
 ]=]
 
@@ -31,7 +31,7 @@ local Players = game:GetService("Players")
     .Data Packet
     @within ServerNetwork
 ]=]
-export type Packet = number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
+export type Packet = number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor | {[string]: Packet}
 export type ServerPacketData = {
     Address: Player,
     Reliable: boolean,
@@ -299,7 +299,7 @@ function ServerNetwork.SendPacketToClient(Name: string, PacketData: ServerPacket
     local packetType = typeof(PacketData.Data)
     local isInstance = packetType == "Instance"
     local sendData = if isInstance
-        then PacketData.Data:GetFullName()
+        then (PacketData.Data:: Instance):GetFullName()
         else PacketData.Data
 
     local signal = ReturnSignal(Name, PacketData.Reliable)
@@ -377,7 +377,7 @@ end
 ]=]
 function ServerNetwork.ListenForPacket(Name: string, IsReliable: boolean, Callback: (Address: Player, ...Packet?) -> ()): RBXScriptConnection
     assert(Name, "Expected string as first argument.")
-    assert(Callback, "Expected boolean as second argument.")
+    assert(typeof(IsReliable) == "boolean", "Expected boolean as second argument.")
     assert(Callback, "Expected function as third argument.")
 
     local connection
@@ -396,17 +396,67 @@ end
 
 --[=[
     @param Name string
+    @param IsReliable boolean
+    @param Callback (Address: Player) -> ()
+    @return RBXScriptConnection
+    @within ServerNetwork
+    Listens for client signals without receving data.
+]=]
+function ServerNetwork.Listen(Name: string, IsReliable: boolean, Callback: (Address: Player) -> ()): RBXScriptConnection
+    assert(Name, "Expected string as first argument.")
+    assert(typeof(IsReliable) == "boolean", "Expected boolean as second argument.")
+    assert(Callback, "Expected function as third argument.")
+
+    local connection
+    local signal = ReturnSignal(Name, IsReliable)
+    assert(signal, "Error finding signal " .. Name)
+
+    if signal.ClassName == "RemoteEvent" then
+        connection = (signal:: RemoteEvent).OnServerEvent:Connect(function(Address: Player)
+            Callback(Address)
+        end)
+    else
+        connection = (signal:: UnreliableRemoteEvent).OnServerEvent:Connect(function(Address: Player)
+            Callback(Address)
+        end)
+    end
+
+    assert(connection, "Error connecting to signal " .. Name)
+    return connection
+end
+
+--[=[
+    @param Name string
     @param Callback (Address: Player, ...Packet?) -> ...any
     @return ()
     @within ServerNetwork
-    Listens for a request from the client. The client expects a return value so make sure your function returns something.
+    Listens for a request and receives data from the client. The client expects a return value so make sure your function returns something.
 ]=]
-function ServerNetwork.ListenForRequest(Name: string, Callback: (Address: Player, ...Packet?) -> ...any): ()
+function ServerNetwork.ListenForRequestPacket(Name: string, Callback: (Address: Player, ...Packet?) -> ...any): ()
     assert(Name, "Expected string as first argument.")
     assert(Callback, "Expected function as second argument.")
 
     local Function = ReturnFunction(Name)
     Function.OnServerInvoke = Callback
+end
+
+--[=[
+    @param Name string
+    @param Callback (Address: Player) -> ...any
+    @return ()
+    @within ServerNetwork
+    Listens for a request from the client. The client expects a return value so make sure your function returns something.
+]=]
+function ServerNetwork.ListenForRequest(Name: string, Callback: (Address: Player) -> ...any): ()
+    assert(Name, "Expected string as first argument.")
+    assert(Callback, "Expected function as second argument.")
+
+    local Function = ReturnFunction(Name)
+
+    local function OnServerInvoke(Player: Player)
+        Callback(Player)
+    end
+    Function.OnServerInvoke = OnServerInvoke
 end
 
 return ServerNetwork

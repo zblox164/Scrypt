@@ -6,7 +6,7 @@
 	@file ClientNetwork.luau
     @client
     @author zblox164
-    @version 0.0.51-alpha
+    @version 0.0.52-alpha
     @since 2024-12-17
 --]]
 
@@ -21,7 +21,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Replicate = require(script.Parent.Replicate)
 
 --[=[
-    @type Packet number | string | {ClientPacketData} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
+    @type Packet number | string | {ClientPacketData} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor | {[string]: Packet}
     @within ClientNetwork
 ]=]
 
@@ -31,7 +31,7 @@ local Replicate = require(script.Parent.Replicate)
     .Reliable boolean
     @within ClientNetwork
 ]=]
-export type Packet = number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
+export type Packet = number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor | {[string]: Packet}
 export type ClientPacketData = {
     Data: Packet,
     Reliable: boolean
@@ -200,6 +200,7 @@ end
 ]=]
 function ClientNetwork.PingServer(Name: string, IsReliable: boolean)
     assert(Name, "Expected string as first argument.")
+    assert(typeof(IsReliable) == "boolean", "Expected boolean as second argument.")
 
     local signal = ReturnSignal(Name, IsReliable)
     if signal:IsA("RemoteEvent") then
@@ -219,7 +220,7 @@ end
 ]=]
 function ClientNetwork.ListenForPacket(Name: string, IsReliable: boolean, Callback: (...Packet) -> ()): RBXScriptConnection
     assert(Name, "Expected string as first argument.")
-    assert(Callback, "Expected boolean as second argument.")
+    assert(typeof(IsReliable) == "boolean", "Expected boolean as second argument.")
     assert(Callback, "Expected function as third argument.")
 
     local connection
@@ -230,6 +231,28 @@ function ClientNetwork.ListenForPacket(Name: string, IsReliable: boolean, Callba
         else
             Callback(Packet)
         end
+    end)
+
+    return connection
+end
+
+--[=[
+    @param Name string
+    @param IsReliable boolean
+    @param Callback () -> ()
+    @return RBXScriptConnection
+    @within ClientNetwork
+    Listens for signals from the server without sending data.
+]=]
+function ClientNetwork.Listen(Name: string, IsReliable: boolean, Callback: () -> ()): RBXScriptConnection
+    assert(Name, "Expected string as first argument.")
+    assert(typeof(IsReliable) == "boolean", "Expected boolean as second argument.")
+    assert(Callback, "Expected function as third argument.")
+
+    local connection
+    local signal = ReturnSignal(Name, IsReliable)
+    connection = (signal.OnClientEvent:: RBXScriptSignal):Connect(function(IsInstance: boolean)
+        Callback()
     end)
 
     return connection
@@ -258,7 +281,7 @@ end
     @within ClientNetwork
     Requests a packet from the server without sending data. This function should be used when you want to request a response from the server but don't want to send any data.
 ]=]
-function ClientNetwork.EmptyRequest(Name: string): Packet
+function ClientNetwork.Request(Name: string): Packet
     assert(Name, "Expected string as first argument.")
 
     local Function = ReturnFunction(Name)
@@ -270,8 +293,9 @@ type ClientNetwork = {
     SendPacket: (Name: string, Packet: ClientPacketData) -> (),
     PingServer: (Name: string, IsReliable: boolean) -> (),
     RequestPacket: (Name: string, Packet: ClientPacketData) -> Packet,
-    EmptyRequest: (Name: string) -> Packet,
+    Request: (Name: string) -> Packet,
     ListenForPacket: (Name: string, IsReliable: boolean, Callback: (...ClientPacketData) -> ()) -> RBXScriptConnection,
+    Listen: (Name: string, IsReliable: boolean, Callback: () -> ()) -> RBXScriptConnection,
     Init: () -> Folder,
 }
 

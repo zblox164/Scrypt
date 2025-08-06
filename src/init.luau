@@ -5,7 +5,7 @@
 	@file Scrypt.lua
     @shared
     @author zblox164
-    @version 0.0.51-alpha
+    @version 0.0.52-alpha
     @since 2024-12-17
 --]]
 
@@ -38,7 +38,7 @@ export type Result<T> = {
     Error: string?
 }
 
-export type Packet = number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor
+export type Packet = number | string | {Packet} | boolean | Instance | buffer | Player | CFrame | Vector3 | Vector2 | Color3 | UDim2 | UDim | Enum | BrickColor | {[string]: Packet}
 export type ClientPacketData = {
     Data: Packet,
     Reliable: boolean

@@ -1,21 +1,31 @@
 --!strict
 return {
-	AnalyticsService = game:GetService("AnalyticsService"), -- A
+	AdService = game:GetService("AdService"), -- A
+	AnalyticsService = game:GetService("AnalyticsService"),
 	AssetService = game:GetService("AssetService"),
+	AvatarCreationService = game:GetService("AvatarCreationService"),
+	AvatarEditorService = game:GetService("AvatarEditorService"),
 
 	BadgeService = game:GetService("BadgeService"), -- B
 
-	CollectionService = game:GetService("CollectionService"), -- C
+	CaptureService = game:GetService("CaptureService"), -- C
+	ChangeHistoryService = game:GetService("ChangeHistoryService"),
+	CollectionService = game:GetService("CollectionService"),
+	CommerceService = game:GetService("CommerceService"),
 	ContentProvider = game:GetService("ContentProvider"),
 	ContextActionService = game:GetService("ContextActionService"),
 
 	DataStoreService = game:GetService("DataStoreService"), -- D
 	Debris = game:GetService("Debris"),
+	DraggerService = game:GetService("DraggerService"),
+
+	ExperienceNotificationService = game:GetService("ExperienceNotificationService"), -- E
 
 	FriendService = game:GetService("FriendService"), -- F
 
 	GamepadService = game:GetService("GamepadService"), -- G
 	GamePassService = game:GetService("GamePassService"),
+	GenerationService = game:GetService("GenerationService"),
 	GeometryService = game:GetService("GeometryService"),
 	GroupService = game:GetService("GroupService"),
 	GuiService = game:GetService("GuiService"),
@@ -27,23 +37,24 @@ return {
 
 	Lighting = game:GetService("Lighting"), -- L
 	LocalizationService = game:GetService("LocalizationService"),
+	LogService = game:GetService("LogService"),
 
 	MarketplaceService = game:GetService("MarketplaceService"), -- M
-	MaterialService = game:GetService("MaterialService"),
 	MatchmakingService = game:GetService("MatchmakingService"),
+	MaterialService = game:GetService("MaterialService"),
 	MemoryStoreService = game:GetService("MemoryStoreService"),
 	MessagingService = game:GetService("MessagingService"),
 
 	PathfindingService = game:GetService("PathfindingService"), -- P
 	PhysicsService = game:GetService("PhysicsService"),
+	PlayerViewService = game:GetService("PlayerViewService"),
 	Players = game:GetService("Players"),
 	PolicyService = game:GetService("PolicyService"),
 	ProximityPromptService = game:GetService("ProximityPromptService"),
 
 	ReplicatedFirst = game:GetService("ReplicatedFirst"), -- R
 	ReplicatedStorage = game:GetService("ReplicatedStorage"),
-
-	RunService = game:GetService("RunService"), -- R
+	RunService = game:GetService("RunService"),
 
 	ServerScriptService = game:GetService("ServerScriptService"), -- S
 	ServerStorage = game:GetService("ServerStorage"),
@@ -54,11 +65,11 @@ return {
 	StarterPlayer = game:GetService("StarterPlayer"),
 
 	Teams = game:GetService("Teams"), -- T
-	TweenService = game:GetService("TweenService"),
 	TeleportService = game:GetService("TeleportService"),
 	TestService = game:GetService("TestService"),
 	TextChatService = game:GetService("TextChatService"),
 	TextService = game:GetService("TextService"),
+	TweenService = game:GetService("TweenService"),
 
 	UserInputService = game:GetService("UserInputService"), -- U
 
