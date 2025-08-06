@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title>Scrypt Blog</title>
+        <link>https://zblox164.github.io/Scrypt/blog</link>
+        <description>Scrypt Blog</description>
+        <lastBuildDate>Tue, 05 Aug 2025 00:00:00 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>https://github.com/jpmonette/feed</generator>
+        <language>en</language>
+        <item>
+            <title><![CDATA[Recent Update Changes]]></title>
+            <link>https://zblox164.github.io/Scrypt/blog/2025/08/05/Recent Update Changes</link>
+            <guid>https://zblox164.github.io/Scrypt/blog/2025/08/05/Recent Update Changes</guid>
+            <pubDate>Tue, 05 Aug 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[In the latest update, there were some changes to existing network functions as well as the removal of some third party modules. The reason for the naming changes is I wanted to keep naming consistent across the framework.]]></description>
+            <content:encoded><![CDATA[<p>In the latest update, there were some changes to existing network functions as well as the removal of some third party modules. The reason for the naming changes is I wanted to keep naming consistent across the framework.</p>
+<p>The function changes were:</p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="servernetwork">ServerNetwork<a href="https://zblox164.github.io/Scrypt/blog/2025/08/05/Recent%20Update%20Changes#servernetwork" class="hash-link" aria-label="Direct link to ServerNetwork" title="Direct link to ServerNetwork">​</a></h4>
+<ul>
+<li><code>Scrypt.ServerNetwork.Listen</code> -- NEW</li>
+<li><code>Scrypt.ServerNetwork.ListenForRequest</code> -- NEW</li>
+<li><code>Scrypt.ServerNetwork.ListenForRequestPacket</code> -- RENAMED FROM 'ListenForRequest'</li>
+</ul>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="clientnetwork">ClientNetwork<a href="https://zblox164.github.io/Scrypt/blog/2025/08/05/Recent%20Update%20Changes#clientnetwork" class="hash-link" aria-label="Direct link to ClientNetwork" title="Direct link to ClientNetwork">​</a></h4>
+<ul>
+<li><code>Scrypt.ClientNetwork.Listen</code> -- NEW</li>
+<li><code>Scrypt.ClientNetwork.Request</code> -- RENAMED FROM 'EmptyRequest'</li>
+</ul>
+<p>Since I added the new 'Listen' functions, I felt the naming of 'EmptyRequest' needed to be changed as well (I didn't want to name 'Listen', 'EmptyListen'). This hopefully will be a one time thing that will not need to be changed again. Since Scrypt is early in development, I want to get the naming consistent now so that in the future, especially if there are more users, it won't be an issue.</p>
+<p>As for the removal of the RegEx and Promise, I wanted to keep Scrypt lightweight and not require any third party modules that are required for the framework to work.</p>]]></content:encoded>
+        </item>
+    </channel>
+</rss>
