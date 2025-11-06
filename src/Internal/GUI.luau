@@ -5,7 +5,7 @@
 	@file GUI.luau (Scrypt)
     @client
     @author zblox164
-    @version 0.0.51-alpha
+    @version 0.0.61-alpha
     @since 2024-12-17
 --]]
 
@@ -15,7 +15,7 @@ type GUINamespace = typeof(setmetatable({}, {}))
 type Result<T> = {Success: boolean, Value: T?, Error: string?}
 
 -- Constants
-local IGNORED_GUIS = table.freeze({"Freecam", "BubbleChat", "Chat"})
+local IGNORED_GUIS = table.freeze({"Freecam", "BubbleChat", "Chat", "TouchGui"})
 
 -- Variables
 local LocalPlayer = game:GetService("Players").LocalPlayer

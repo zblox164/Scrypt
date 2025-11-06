@@ -6,7 +6,7 @@
 	@file ClientNetwork.luau
     @server
     @author zblox164
-    @version 0.0.52-alpha
+    @version 0.0.61-alpha
     @since 2024-12-17
 --]]
 
@@ -454,7 +454,7 @@ function ServerNetwork.ListenForRequest(Name: string, Callback: (Address: Player
     local Function = ReturnFunction(Name)
 
     local function OnServerInvoke(Player: Player)
-        Callback(Player)
+        return Callback(Player)
     end
     Function.OnServerInvoke = OnServerInvoke
 end

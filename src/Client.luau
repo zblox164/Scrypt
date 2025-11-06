@@ -6,7 +6,7 @@
 	@file Server.lua (Scrypt)
     @client
     @author zblox164
-    @version 0.0.52-alpha
+    @version 0.0.61-alpha
     @since 2024-12-17
 --]]
 
@@ -270,6 +270,12 @@ local function SetupBuiltInFeatures()
 	ScryptClient.CreateFunction = function(Name: string?, IsPrivate: boolean?): Function
 		return Function.New(Name, IsPrivate)
 	end
+
+	--[=[
+		@prop Version string
+		@within ScryptClient
+	]=]
+	ScryptClient.Version = "0.0.61-alpha"
 end
 
 -- Loads all game modules (controllers)

@@ -1,4 +1,10 @@
-## v0.0.52-alpha
+## v0.0.61-alpha
+#### 11/06/2025
+* Added version property
+* Minor improvements
+* Fixed bug with client network requests
+
+## v0.0.6-alpha
 #### 08/05/2025
 * Added new function to ServerNetwork: 'Listen'
 * Added new function to ServerNetwork: 'ListenForRequest'

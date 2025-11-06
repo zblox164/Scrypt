@@ -6,7 +6,7 @@
 	@file ClientNetwork.luau
     @client
     @author zblox164
-    @version 0.0.52-alpha
+    @version 0.0.61-alpha
     @since 2024-12-17
 --]]
 
