@@ -6,7 +6,8 @@
 	@file Replicate.luau
     @shared
     @author zblox164
-    @version 0.0.61-alpha
+    @version 0.0.62-alpha
+    @since v0.0.5-alpha
     @since 2024-12-17
 --]]
 

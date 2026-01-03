@@ -1,3 +1,13 @@
+## v0.0.62-alpha
+#### 01/02/2026
+* Fixed network argument validation error logs not showing up
+* Edited argument order for `SendPacketToAllClients`
+* Added unadded Roblox services to RBXServices.luau
+* Improvements to documentation
+    * Added readonly tags
+    * Added version tags to functions
+    * Added information in API about :Replicate() feature
+
 ## v0.0.61-alpha
 #### 11/06/2025
 * Added version property

@@ -5,7 +5,7 @@
 	@file Network.luau
     @shared
     @author zblox164
-    @version 0.0.61-alpha
+    @version 0.0.62-alpha
     @since 2024-12-17
 --]]
 
@@ -16,10 +16,10 @@ local function GetServerNetwork()
 end
 
 local function GetClientNetwork()
-	task.defer(function() 
-		script:WaitForChild("ServerNetwork"):Destroy() 
+	task.defer(function()
+		script:WaitForChild("ServerNetwork"):Destroy()
 	end)
-	
+
 	return require(script.ClientNetwork)
 end
 

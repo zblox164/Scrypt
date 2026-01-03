@@ -1,5 +1,5 @@
 # Scrypt
-Current version 0.0.61-alpha
+Current version 0.0.62-alpha
 
 ## What is Scrypt?
 Scrypt is a lightweight Roblox development framework. Scrypt aims to be an easy-to-use framework to power your Roblox projects! It includes several feature to improve your workflow over vanilla Luau. Those include:

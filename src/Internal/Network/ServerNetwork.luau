@@ -6,7 +6,7 @@
 	@file ClientNetwork.luau
     @server
     @author zblox164
-    @version 0.0.61-alpha
+    @version 0.0.62-alpha
     @since 2024-12-17
 --]]
 
@@ -117,11 +117,11 @@ end
 -- Function to create a new signal
 local function CreateSignal(name: string, location: Instance, isReliable: boolean): RemoteEvent | UnreliableRemoteEvent
     local validation = ValidateParams(name, location)
-    assert(validation.Success, validation.Error)
+    if not validation.Success then return warn(validation.Error) end
 
     local newSignal = CreateRemoteInstance(name, isReliable)
-    assert(newSignal.Success, newSignal.Error)
-    assert(newSignal.Value, "Error creating signal " .. name)
+    if not newSignal.Success then return warn(newSignal.Error) end
+    if not newSignal.Value then return warn("Error creating signal " .. name) end
 
     newSignal.Value.Name = name
     newSignal.Value.Parent = location
@@ -135,7 +135,7 @@ local function GetUnreliableEvent(name: string, signals: Folder): UnreliableRemo
         newUnreliableSignal = CreateSignal(name, signals, false):: UnreliableRemoteEvent
     end
 
-    assert(newUnreliableSignal, "Error finding signal " .. name)
+    if not newUnreliableSignal then return warn("Error finding signal " .. name) end
     return newUnreliableSignal
 end
 
@@ -146,13 +146,15 @@ local function GetEvent(name: string, signals: Folder): RemoteEvent
         newSignal = CreateSignal(name, signals, true):: RemoteEvent
     end
 
-    assert(newSignal, "Error finding signal " .. name)
+    if not newSignal then return warn("Error finding signal " .. name) end
     return newSignal
 end
 
 local function FindSignal(name: string, signals: Folder, isReliable: boolean): RemoteEvent | UnreliableRemoteEvent
     local newSignal = if isReliable then GetEvent(name, signals) else GetUnreliableEvent(name, signals)
-    assert(newSignal.ClassName == "RemoteEvent" or newSignal.ClassName == "UnreliableRemoteEvent", "Error finding signal " .. name)
+    if not newSignal or not ((newSignal.ClassName == "RemoteEvent") or (newSignal.ClassName == "UnreliableRemoteEvent")) then
+        return
+    end
 
     return newSignal
 end
@@ -160,7 +162,7 @@ end
 -- Pure function to create function
 local function CreateFunction(name: string, location: Instance): RemoteFunction
     local validation = ValidateParams(name, location)
-    assert(validation.Success, validation.Error)
+    if not validation.Success then return warn(validation.Error) end
 
     local newFunction = Instance.new("RemoteFunction")
     newFunction.Name = name
@@ -172,31 +174,33 @@ end
 -- Returns a signal based on the name and reliability
 local function ReturnSignal(name: string, isReliable: boolean): RemoteEvent | UnreliableRemoteEvent
     local remotes = ReplicatedStorage:FindFirstChild("ScryptCommunication"):: Folder
-    assert(remotes, "Attempt to use event before network was loaded!")
+    if not remotes then return warn("Attempt to use event before network was loaded!") end
 
     local signals = remotes:FindFirstChild("Signals"):: Folder
-    assert(signals, "Attempt to use event before network was loaded!")
+    if not signals then return warn("Attempt to use event before network was loaded!") end
 
     local newSignal = FindSignal(name, signals, isReliable)
-    assert((newSignal.ClassName == "RemoteEvent" and isReliable) or (newSignal.ClassName == "UnreliableRemoteEvent" and not isReliable),
-        "Incorrect remote type! Remotes between the client and server may be out of sync! Signal name: " .. name)
+    if not newSignal or (not (newSignal.ClassName == "RemoteEvent") and not (newSignal.ClassName == "UnreliableRemoteEvent")) then
+        return warn("Error finding signal " .. name)
+    end
+
     return newSignal
 end
 
 -- Returns a function based on the name
 local function ReturnFunction(name: string): RemoteFunction
     local remotes = ReplicatedStorage:FindFirstChild("ScryptCommunication"):: Folder
-    assert(remotes, "Attempt to use function before network was loaded!")
+    if not remotes then return warn("Attempt to use function before network was loaded!") end
 
     local functions = remotes:FindFirstChild("Functions")
-    assert(functions, "Attempt to use function before network was loaded!")
+    if not functions then return warn("Attempt to use function before network was loaded!") end
 
     local newFunction: RemoteFunction = functions:FindFirstChild(name):: RemoteFunction
     if not newFunction then
         newFunction = CreateFunction(name, functions)
     end
 
-    assert(newFunction, "Error finding signal " .. name)
+    if not newFunction then return warn("Error finding signal " .. name) end
     return newFunction
 end
 
@@ -225,25 +229,25 @@ end
 local function CreateClientRemote(params: RemoteParams): string
     local validationResult = ValidateRemoteParams(params)
     if not validationResult.Success then
-        return error(validationResult.Error)
+        return warn(validationResult.Error)
     end
 
     local configResult = DetermineRemoteConfig(params)
     if not configResult.Success then
-        return error(configResult.Error)
+        return warn(configResult.Error)
     end
 
     local config = configResult.Value:: RemoteCreateResult
     local rootFolderResult = VerifyNetworkIntegrity():: Result<Folder>
-    assert(rootFolderResult.Success, rootFolderResult.Error)
+    if not rootFolderResult.Success then return warn(rootFolderResult.Error) end
 
-    local RootFolder = rootFolderResult.Value:: Folder
-    assert(RootFolder, "Error finding root folder")
+    local rootFolder = rootFolderResult.Value:: Folder
+    if not rootFolder then return warn("Error finding root folder") end
 
     -- Create instance (this is the only impure operation)
     local newRemote = Instance.new(config.RemoteType)
     newRemote.Name = config.Name
-    newRemote.Parent = RootFolder:FindFirstChild(config.Parent)
+    newRemote.Parent = rootFolder:FindFirstChild(config.Parent)
 
     return newRemote.Name
 end
@@ -260,11 +264,11 @@ local ServerNetwork = {}
 ]=]
 function ServerNetwork.Init(): Folder
     local rootFolder = VerifyNetworkIntegrity():: Result<Folder>
-    assert(rootFolder.Success, rootFolder.Error)
-    assert(rootFolder.Value, "Error finding root folder")
+    if not rootFolder.Success then return warn(rootFolder.Error) end
+    if not rootFolder.Value then return warn("Error finding root folder") end
 
     local functionFolder = rootFolder.Value:FindFirstChild("Functions")
-    assert(functionFolder, "Error finding functions folder")
+    if not functionFolder then return warn("Error finding functions folder") end
 
     if not functionFolder:FindFirstChild("CreateRemote") then
         local newRemote = Instance.new("RemoteFunction")
@@ -293,8 +297,11 @@ end
     Sends data to a specific player from the server.
 ]=]
 function ServerNetwork.SendPacketToClient(Name: string, PacketData: ServerPacketData)
-    assert(Name, "Expected string as first argument.")
-    assert(PacketData, "Expected ServerPacketData as second argument.")
+    if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
+    if not PacketData then return warn("Expected ClientPacketData as second argument.") end
+    if not PacketData.Address or typeof(PacketData.Address) ~= "Instance" then return warn("Expected ClientPacketData as second argument.") end
+    if not PacketData.Data or not (typeof(PacketData.Data) ~= "table") then return warn("Expected ClientPacketData as second argument.") end
+    if PacketData.Reliable == nil or typeof(PacketData.Reliable) ~= "boolean" then return warn("Expected ClientPacketData as second argument.") end
 
     local packetType = typeof(PacketData.Data)
     local isInstance = packetType == "Instance"
@@ -312,14 +319,15 @@ end
 
 --[=[
     @param Name string
-    @param Packet Packet
     @param IsReliable boolean
+    @param Packet Packet
     @within ServerNetwork
     Sends data to all clients in a server.
 ]=]
-function ServerNetwork.SendPacketToAllClients(Name: string, Packet: Packet, IsReliable: boolean)
-    assert(Name, "Expected string as first argument.")
-    assert(Packet, "Expected ServerPacketData as second argument.")
+function ServerNetwork.SendPacketToAllClients(Name: string, IsReliable: boolean, Packet: Packet)
+    if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
+    if typeof(IsReliable) ~= "boolean" then return warn("Expected boolean as second argument.") end
+    if Packet == nil then return warn("Expected Packet as third argument.") end
 
     for _, player in ipairs(Players:GetPlayers()) do
         local playerPacket = {
@@ -340,9 +348,9 @@ end
     Pings a specific client. This function should be used when you want to communicate with the client but don't want to send any data.
 ]=]
 function ServerNetwork.PingClient(Name: string, Address: Player, IsReliable: boolean)
-    assert(Name, "Expected string as first argument.")
-    assert(Address, "Expected Player as second argument.")
-    assert(typeof(IsReliable) == "boolean", "Expected boolean as third argument.")
+    if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
+    if not Address or typeof(Address) ~= "Instance" then return warn("Expected Player as second argument.") end
+    if typeof(IsReliable) ~= "boolean" then return warn("Expected boolean as third argument.") end
 
     local signal = ReturnSignal(Name, IsReliable)
     if signal.ClassName == "RemoteEvent" then
@@ -359,8 +367,8 @@ end
     Pings all clients. This function should be used when you want to communicate with all clients but don't want to send any data.
 ]=]
 function ServerNetwork.PingAllClients(Name: string, IsReliable: boolean)
-    assert(Name, "Expected string as first argument.")
-    assert(typeof(IsReliable) == "boolean", "Expected boolean as second argument.")
+    if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
+    if typeof(IsReliable) ~= "boolean" then return warn("Expected boolean as second argument.") end
 
     for _, player in ipairs(Players:GetPlayers()) do
         ServerNetwork.PingClient(Name, player, IsReliable)
@@ -376,13 +384,13 @@ end
     Listens for data from the client.
 ]=]
 function ServerNetwork.ListenForPacket(Name: string, IsReliable: boolean, Callback: (Address: Player, ...Packet?) -> ()): RBXScriptConnection
-    assert(Name, "Expected string as first argument.")
-    assert(typeof(IsReliable) == "boolean", "Expected boolean as second argument.")
-    assert(Callback, "Expected function as third argument.")
+    if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
+    if typeof(IsReliable) ~= "boolean" then return warn("Expected boolean as second argument.") end
+    if typeof(Callback) ~= "function" then return warn("Expected function as third argument.") end
 
     local connection
     local signal = ReturnSignal(Name, IsReliable)
-    assert(signal, "Error finding signal " .. Name)
+    if not signal then return warn("Error finding signal " .. Name) end
 
     if signal.ClassName == "RemoteEvent" then
         connection = (signal:: RemoteEvent).OnServerEvent:Connect(Callback)
@@ -400,16 +408,17 @@ end
     @param Callback (Address: Player) -> ()
     @return RBXScriptConnection
     @within ServerNetwork
+    @since v0.0.6-alpha
     Listens for client signals without receving data.
 ]=]
 function ServerNetwork.Listen(Name: string, IsReliable: boolean, Callback: (Address: Player) -> ()): RBXScriptConnection
-    assert(Name, "Expected string as first argument.")
-    assert(typeof(IsReliable) == "boolean", "Expected boolean as second argument.")
-    assert(Callback, "Expected function as third argument.")
+    if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
+    if typeof(IsReliable) ~= "boolean" then return warn("Expected boolean as second argument.") end
+    if typeof(Callback) ~= "function" then return warn("Expected function as third argument.") end
 
     local connection
     local signal = ReturnSignal(Name, IsReliable)
-    assert(signal, "Error finding signal " .. Name)
+    if not signal then return warn("Error finding signal " .. Name) end
 
     if signal.ClassName == "RemoteEvent" then
         connection = (signal:: RemoteEvent).OnServerEvent:Connect(function(Address: Player)
@@ -433,8 +442,8 @@ end
     Listens for a request and receives data from the client. The client expects a return value so make sure your function returns something.
 ]=]
 function ServerNetwork.ListenForRequestPacket(Name: string, Callback: (Address: Player, ...Packet?) -> ...any): ()
-    assert(Name, "Expected string as first argument.")
-    assert(Callback, "Expected function as second argument.")
+    if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
+    if typeof(Callback) ~= "function" then return warn("Expected function as second argument.") end
 
     local Function = ReturnFunction(Name)
     Function.OnServerInvoke = Callback
@@ -445,11 +454,12 @@ end
     @param Callback (Address: Player) -> ...any
     @return ()
     @within ServerNetwork
+    @since v0.0.6-alpha
     Listens for a request from the client. The client expects a return value so make sure your function returns something.
 ]=]
 function ServerNetwork.ListenForRequest(Name: string, Callback: (Address: Player) -> ...any): ()
-    assert(Name, "Expected string as first argument.")
-    assert(Callback, "Expected function as second argument.")
+    if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
+    if typeof(Callback) ~= "function" then return warn("Expected function as second argument.") end
 
     local Function = ReturnFunction(Name)
 

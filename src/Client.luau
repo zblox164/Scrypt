@@ -6,7 +6,7 @@
 	@file Server.lua (Scrypt)
     @client
     @author zblox164
-    @version 0.0.61-alpha
+    @version 0.0.62-alpha
     @since 2024-12-17
 --]]
 
@@ -32,11 +32,13 @@
 
 --[=[
 	@type GUI {[string]: {[string]: GuiObject}}
+	@since v0.0.42-alpha
 	@within ScryptClient
 ]=]
 
 --[=[
 	@prop Monad MonadClass
+	@since v0.0.5-alpha
 	@within ScryptClient
 ]=]
 
@@ -48,6 +50,7 @@
 --[=[
 	@prop GUI GUI
 	@within ScryptClient
+	@since v0.0.42-alpha
 	Contains a dictionary of GUI objects.
 ]=]
 
@@ -60,13 +63,13 @@
 --[=[
 	@prop Utils {(...any) -> ...any}
 	@within ScryptClient
+	@since v0.0.4-alpha
 	Returns the Utils module. Contains some basic pure functions.
 ]=]
 
 --[=[
 	@prop ClientNetwork ClientNetwork
 	@within ScryptClient
-
 	Returns the ClientNetwork class.
 ]=]
 
@@ -273,9 +276,11 @@ local function SetupBuiltInFeatures()
 
 	--[=[
 		@prop Version string
+		@since v0.0.61-alpha
+		@readonly
 		@within ScryptClient
 	]=]
-	ScryptClient.Version = "0.0.61-alpha"
+	ScryptClient.Version = "0.0.62-alpha"
 end
 
 -- Loads all game modules (controllers)

@@ -6,8 +6,8 @@
 	@file Monad.luau
     @server
     @author zblox164
-    @version 0.0.61-alpha
-    @since 2024-12-17
+    @version 0.0.62-alpha
+    @since v0.0.5-alpha
 --]]
 
 type Maybe<T> = {

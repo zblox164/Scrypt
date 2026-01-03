@@ -6,7 +6,7 @@
 	@file Server.lua (Scrypt)
     @server
     @author zblox164
-    @version 0.0.61-alpha
+    @version 0.0.62-alpha
     @since 2024-12-17
 --]]
 
@@ -32,6 +32,7 @@
 
 --[=[
 	@prop Monad MonadClass
+	@since v0.0.5-alpha
 	@within ScryptServer
 ]=]
 
@@ -44,13 +45,13 @@
 --[=[
 	@prop Utils {(...any) -> ...any}
 	@within ScryptServer
+	@since v0.0.4-alpha
 	Returns the Utils module. Contains some basic pure functions.
 ]=]
 
 --[=[
 	@prop ServerNetwork ServerNetwork
 	@within ScryptServer
-
 	Returns the ServerNetwork class.
 ]=]
 
@@ -241,9 +242,11 @@ local function SetupBuiltInFeatures()
 
 	--[=[
 		@prop Version string
+		@since v0.0.61-alpha
+		@readonly
 		@within ScryptServer
 	]=]
-	ScryptServer.Version = "0.0.61-alpha"
+	ScryptServer.Version = "0.0.62-alpha"
 end
 
 -- Function to get all services

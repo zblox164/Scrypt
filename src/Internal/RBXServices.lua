@@ -12,6 +12,7 @@ return {
 	ChangeHistoryService = game:GetService("ChangeHistoryService"),
 	CollectionService = game:GetService("CollectionService"),
 	CommerceService = game:GetService("CommerceService"),
+	ConfigService = game:GetService("ConfigService"),
 	ContentProvider = game:GetService("ContentProvider"),
 	ContextActionService = game:GetService("ContextActionService"),
 
@@ -19,7 +20,8 @@ return {
 	Debris = game:GetService("Debris"),
 	DraggerService = game:GetService("DraggerService"),
 
-	ExperienceNotificationService = game:GetService("ExperienceNotificationService"), -- E
+	EncodingService = game:GetService("EncodingService"), -- E
+	ExperienceNotificationService = game:GetService("ExperienceNotificationService"),
 
 	FriendService = game:GetService("FriendService"), -- F
 
@@ -31,6 +33,7 @@ return {
 	GuiService = game:GetService("GuiService"),
 
 	HapticService = game:GetService("HapticService"), -- H
+	HeapProfilerService = game:GetService("HeapProfilerService"),
 	HttpService = game:GetService("HttpService"),
 
 	InsertService = game:GetService("InsertService"), -- I
@@ -52,7 +55,9 @@ return {
 	PolicyService = game:GetService("PolicyService"),
 	ProximityPromptService = game:GetService("ProximityPromptService"),
 
-	ReplicatedFirst = game:GetService("ReplicatedFirst"), -- R
+	RecommendationService = game:GetService("RecommendationService"), -- R
+	ReflectionService = game:GetService("ReflectionService"),
+	ReplicatedFirst = game:GetService("ReplicatedFirst"),
 	ReplicatedStorage = game:GetService("ReplicatedStorage"),
 	RunService = game:GetService("RunService"),
 
@@ -72,6 +77,7 @@ return {
 	TweenService = game:GetService("TweenService"),
 
 	UserInputService = game:GetService("UserInputService"), -- U
+	UserService = game:GetService("UserService"),
 
 	VoiceChatService = game:GetService("VoiceChatService"), -- V
 	VRService = game:GetService("VRService"),
