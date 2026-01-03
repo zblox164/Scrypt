@@ -4,10 +4,18 @@
         <title>Scrypt Blog</title>
         <link>https://zblox164.github.io/Scrypt/blog</link>
         <description>Scrypt Blog</description>
-        <lastBuildDate>Tue, 05 Aug 2025 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 02 Jan 2026 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
+        <item>
+            <title><![CDATA[Small Update]]></title>
+            <link>https://zblox164.github.io/Scrypt/blog/2026/01/02/Small Update</link>
+            <guid>https://zblox164.github.io/Scrypt/blog/2026/01/02/Small Update</guid>
+            <pubDate>Fri, 02 Jan 2026 00:00:00 GMT</pubDate>
+            <description><![CDATA[With the recent announcements of Roblox introducing invasive age verification features, the future of this framework has become less certain. This framework will continue to be in development as long as I am able to collaborate with other developers without compromising my privacy to a large corporation like Roblox. If that changes, this framework, will immediately halt all development as I will be leaving the platform.]]></description>
+            <content:encoded><![CDATA[<p>With the recent announcements of Roblox introducing invasive age verification features, the future of this framework has become less certain. This framework will continue to be in development as long as I am able to collaborate with other developers without compromising my privacy to a large corporation like Roblox. If that changes, this framework, will immediately halt all development as I will be leaving the platform.</p>]]></content:encoded>
+        </item>
         <item>
             <title><![CDATA[Recent Update Changes]]></title>
             <link>https://zblox164.github.io/Scrypt/blog/2025/08/05/Recent Update Changes</link>

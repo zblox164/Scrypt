@@ -2,11 +2,19 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://zblox164.github.io/Scrypt/blog</id>
     <title>Scrypt Blog</title>
-    <updated>2025-08-05T00:00:00.000Z</updated>
+    <updated>2026-01-02T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://zblox164.github.io/Scrypt/blog"/>
     <subtitle>Scrypt Blog</subtitle>
     <icon>https://zblox164.github.io/Scrypt/./media/test.png</icon>
+    <entry>
+        <title type="html"><![CDATA[Small Update]]></title>
+        <id>https://zblox164.github.io/Scrypt/blog/2026/01/02/Small Update</id>
+        <link href="https://zblox164.github.io/Scrypt/blog/2026/01/02/Small Update"/>
+        <updated>2026-01-02T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[With the recent announcements of Roblox introducing invasive age verification features, the future of this framework has become less certain. This framework will continue to be in development as long as I am able to collaborate with other developers without compromising my privacy to a large corporation like Roblox. If that changes, this framework, will immediately halt all development as I will be leaving the platform.]]></summary>
+        <content type="html"><![CDATA[<p>With the recent announcements of Roblox introducing invasive age verification features, the future of this framework has become less certain. This framework will continue to be in development as long as I am able to collaborate with other developers without compromising my privacy to a large corporation like Roblox. If that changes, this framework, will immediately halt all development as I will be leaving the platform.</p>]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Recent Update Changes]]></title>
         <id>https://zblox164.github.io/Scrypt/blog/2025/08/05/Recent Update Changes</id>
