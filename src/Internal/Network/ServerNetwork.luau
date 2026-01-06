@@ -6,7 +6,7 @@
 	@file ClientNetwork.luau
     @server
     @author zblox164
-    @version 0.0.62-alpha
+    @version 0.0.63-alpha
     @since 2024-12-17
 --]]
 
@@ -298,10 +298,10 @@ end
 ]=]
 function ServerNetwork.SendPacketToClient(Name: string, PacketData: ServerPacketData)
     if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
-    if not PacketData then return warn("Expected ClientPacketData as second argument.") end
-    if not PacketData.Address or typeof(PacketData.Address) ~= "Instance" then return warn("Expected ClientPacketData as second argument.") end
-    if not PacketData.Data or not (typeof(PacketData.Data) ~= "table") then return warn("Expected ClientPacketData as second argument.") end
-    if PacketData.Reliable == nil or typeof(PacketData.Reliable) ~= "boolean" then return warn("Expected ClientPacketData as second argument.") end
+    if not PacketData then return warn("Expected ServerPacketData as second argument.") end
+    if not PacketData.Address or typeof(PacketData.Address) ~= "Instance" then return warn("Expected ServerPacketData as second argument.") end
+    if not PacketData.Data then return warn("Expected ServerPacketData as second argument.") end
+    if PacketData.Reliable == nil or typeof(PacketData.Reliable) ~= "boolean" then return warn("Expected ServerPacketData as second argument.") end
 
     local packetType = typeof(PacketData.Data)
     local isInstance = packetType == "Instance"

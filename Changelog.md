@@ -1,3 +1,7 @@
+## v0.0.63-alpha
+* Fixed network argument validation check bug
+* Minor warning typo fix
+
 ## v0.0.62-alpha
 #### 01/02/2026
 * Fixed network argument validation error logs not showing up

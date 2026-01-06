@@ -6,7 +6,7 @@
 	@file ClientNetwork.luau
     @client
     @author zblox164
-    @version 0.0.62-alpha
+    @version 0.0.63-alpha
     @since 2024-12-17
 --]]
 
@@ -183,7 +183,7 @@ end
 function ClientNetwork.SendPacket(Name: string, PacketData: ClientPacketData)
     if typeof(Name) ~= "string" then return warn("Expected string a first argument.") end
     if not PacketData then return warn("Expected ClientPacketData as second argument.") end
-    if not PacketData.Data or not (typeof(PacketData.Data) ~= "table") then return warn("Expected ClientPacketData as second argument.") end
+    if not PacketData.Data then return warn("Expected ClientPacketData as second argument.") end
     if PacketData.Reliable == nil or typeof(PacketData.Reliable) ~= "boolean" then return warn("Expected ClientPacketData as second argument.") end
 
     local signal = ReturnSignal(Name, PacketData.Reliable)
